@@ -7,6 +7,10 @@
     "test": "lab -a code -t 100 -L -v",
     "test-coverage": "lab -c -a code -r html -o coverage/coverage.html"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/p-meier/hapi-versioning.git"
+  },
   "keywords": [
     "hapi",
     "hapijs",
