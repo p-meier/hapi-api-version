@@ -1,0 +1,16 @@
+language: node_js
+
+node_js:
+    - 4.0
+    - 4
+    - 5
+
+env:
+    - HAPI_VERSION="10"
+    - HAPI_VERSION="11"
+
+install:
+    - npm install
+    - npm install hapi@$HAPI_VERSION
+
+sudo: false
