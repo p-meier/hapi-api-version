@@ -58,7 +58,7 @@ Time to add some routes...
 
 There are typically two common use cases which this plugin is designed to address.
 
-##### Unversioned routes
+#### Unversioned routes
 
 This is the type of routes which never change regardless of the api version. The route definition and the handler stay the same.
 
@@ -77,11 +77,11 @@ server.route({
 });
 ```
 
-##### Versioned routes
+#### Versioned routes
 
 This is the type of routes which actually change.
 
-###### Handler only
+##### Handler only
 
 In simple cases where just the handler differs you could use this approach.
 
@@ -111,7 +111,7 @@ server.route({
 });
 ```
 
-###### Different route definitions per version
+##### Different route definitions per version
 
 Sometimes it is required to change not just the handler but also the route definition itself.
 
@@ -176,10 +176,10 @@ A complete working example with routes can be found in the `example` folder.
 
 **hapi-versioning** works internally with rewriting urls. The process is very simple:
 
-1) Check if an `accept` header OR a custom header (default `api-version`) is present and extract the version
-2) If a version was extracted check if it is valid, otherwise respond with a status code `400`
-3) If no version was extracted (e.g. no headers sent) use the default version
-4) Check if a versioned route (like `/v2/users`) exists -> if so rewrite the url from `/users` to `/v2/users`, otherwise do nothing
+1. Check if an `accept` header OR a custom header (default `api-version`) is present and extract the version
+2. If a version was extracted check if it is valid, otherwise respond with a status code `400`
+3. If no version was extracted (e.g. no headers sent) use the default version
+4. Check if a versioned route (like `/v2/users`) exists -> if so rewrite the url from `/users` to `/v2/users`, otherwise do nothing
 
 ### Options
 
