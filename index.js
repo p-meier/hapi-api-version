@@ -3,7 +3,7 @@
 const Boom = require('boom');
 const Hoek = require('hoek');
 const Joi = require('joi');
-const mediaType = require('media-type');
+const MediaType = require('media-type');
 
 const Package = require('./package');
 
@@ -30,7 +30,7 @@ const _extractVersionFromCustomHeader = function (request, options) {
 const _extractVersionFromAcceptHeader = function (request, options) {
 
     const acceptHeader = request.headers.accept;
-    const media = mediaType.fromString(acceptHeader);
+    const media = MediaType.fromString(acceptHeader);
 
     if (media.isValid() && (/^vnd.[a-zA-Z0-9]+\.v[0-9]+$/).test(media.subtype)) {
 
