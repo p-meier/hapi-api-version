@@ -14,7 +14,7 @@ server.register({
     register: require('../'),
     options: {
         validVersions: [1, 2],
-        defaultVersion: 1,
+        defaultVersion: 2,
         vendorName: 'mysuperapi'
     }
 }, (err) => {
