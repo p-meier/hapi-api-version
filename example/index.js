@@ -1,6 +1,7 @@
 'use strict';
 
 const Hapi = require('hapi');
+const Joi = require('joi');
 
 // Create a server with a host and port
 const server = new Hapi.Server();
@@ -22,27 +23,45 @@ server.register({
         throw err;
     }
 
-    // Add a route - handler is the same for all versions
+    // Add a route - handler and route definition is the same for all versions
     server.route({
         method: 'GET',
         path: '/version',
         handler: function (request, reply) {
 
+            // Return the api-version which was requested
             return reply({
                 version: request.pre.apiVersion
             });
         }
     });
 
-    // Add a versioned route - handler and maybe route defintion (think of validation) is different for versions
+    const usersVersion1 = [{
+        name: 'Peter Miller'
+    }];
+
+    const usersVersion2 = [{
+        firtname: 'Peter',
+        lastname: 'Miller'
+    }];
+
+    // Add a versioned route - which is actually two routes with prefix '/v1' and '/v2'. Not only the
+    // handlers are different, but also the route defintion itself (like here with response validation).
     server.route({
         method: 'GET',
         path: '/v1/users',
         handler: function (request, reply) {
 
-            return reply([{
-                name: 'Peter Miller'
-            }]);
+            return reply(usersVersion1);
+        },
+        config: {
+            response: {
+                schema: Joi.array().items(
+                    Joi.object({
+                        name: Joi.string().required()
+                    })
+                )
+            }
         }
     });
 
@@ -51,10 +70,37 @@ server.register({
         path: '/v2/users',
         handler: function (request, reply) {
 
-            return reply([{
-                firtname: 'Peter',
-                lastname: 'Miller'
-            }]);
+            return reply(usersVersion2);
+        },
+        config: {
+            response: {
+                schema: Joi.array().items(
+                    Joi.object({
+                        firtname: Joi.string().required(),
+                        lastname: Joi.string().required()
+                    })
+                )
+            }
+        }
+
+    });
+
+    // Add a versioned route - This is a simple version of the '/users' route where just the handlers
+    // differ and even those just a little. It maybe is the preferred option if just the formatting of
+    // the response differs between versions.
+
+    server.route({
+        method: 'GET',
+        path: '/users/simple',
+        handler: function (request, reply) {
+
+            const version = request.pre.apiVersion;
+
+            if (version === 1) {
+                return reply(usersVersion1);
+            }
+
+            return reply(usersVersion2);
         }
     });
 
