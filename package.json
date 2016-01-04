@@ -1,0 +1,35 @@
+{
+  "name": "hapi-versioning",
+  "version": "1.0.0",
+  "description": "An API versioning plugin for hapi.",
+  "main": "index.js",
+  "scripts": {
+    "test": "lab -a code -t 100 -L -v",
+    "test-coverage": "lab -c -a code -r html -o coverage/coverage.html"
+  },
+  "keywords": [
+    "hapi",
+    "hapijs",
+    "api",
+    "versioning"
+  ],
+  "author": "Patrick Meier",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=4.0.0"
+  },
+  "peerDependencies": {
+    "hapi": ">=10.x.x"
+  },
+  "devDependencies": {
+    "code": "^2.0.1",
+    "hapi": "^11.1.4",
+    "lab": "^8.0.0"
+  },
+  "dependencies": {
+    "boom": "^3.1.1",
+    "hoek": "^3.0.4",
+    "joi": "^7.1.0",
+    "media-type": "^0.3.0"
+  }
+}
