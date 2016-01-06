@@ -1,6 +1,6 @@
-# hapi-versioning
+# hapi-api-version
 
-[![Build Status](https://travis-ci.org/p-meier/hapi-versioning.svg?branch=master)](https://travis-ci.org/p-meier/hapi-versioning)
+[![Build Status](https://travis-ci.org/p-meier/hapi-api-version.svg?branch=master)](https://travis-ci.org/p-meier/hapi-api-version)
 
 An API versioning plugin for [hapi](http://hapijs.com/).
 
@@ -19,7 +19,7 @@ Runs with Node >=4 and hapi >=10 which is tested with Travis CI.
 ## Installation
 
 ```
-npm install --save hapi-versioning
+npm install --save hapi-api-version
 ```
 
 ## Usage
@@ -37,7 +37,7 @@ server.connection({
 });
 
 server.register({
-    register: require('hapi-versioning'),
+    register: require('hapi-api-version'),
     options: {
         validVersions: [1, 2],
         defaultVersion: 2,
@@ -174,7 +174,7 @@ A complete working example with routes can be found in the `example` folder.
 
 ## Documentation
 
-**hapi-versioning** works internally with rewriting urls. The process is very simple:
+**hapi-api-version** works internally with rewriting urls. The process is very simple:
 
 1. Check if an `accept` header OR a custom header (default `api-version`) is present and extract the version
 2. If a version was extracted check if it is valid, otherwise respond with a status code `400`
