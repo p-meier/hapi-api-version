@@ -82,7 +82,7 @@ exports.register = function (server, options, next) {
 
         const route = server.match(request.method, versionedPath);
 
-        if (route) {
+        if (route && route.path === versionedPath) {
             request.setUrl('/v' + requestedVersion + request.url.path); //required to preserve query parameters
         }
 
