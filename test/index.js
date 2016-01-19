@@ -312,6 +312,20 @@ describe('Versioning', () => {
             }
         });
 
+        server.route({
+            method: 'GET',
+            path: '/corstest',
+            handler: function (request, reply) {
+
+                return reply('Testing CORS!');
+            },
+            config: {
+                cors: {
+                    origin: ['*']
+                }
+            }
+        });
+
         done();
     });
 
@@ -497,6 +511,33 @@ describe('Versioning', () => {
             expect(response.statusCode).to.equal(200);
             expect(response.result.params).to.deep.equal({
                 test: '1'
+            });
+
+            done();
+        });
+    });
+
+    it('should work with CORS enabled', (done) => {
+
+        server.inject({
+            method: 'OPTIONS',
+            url: '/corstest',
+            headers: {
+                'Origin': 'http://www.example.com',
+                'Access-Control-Request-Method': 'GET',
+                'Access-Control-Request-Headers': 'accept, authorization'
+            }
+        }, (response) => {
+
+            expect(response.statusCode).to.equal(200);
+            expect(response.headers).to.include({
+                'access-control-allow-origin': 'http://www.example.com'
+            });
+            expect(response.headers).to.include({
+                'access-control-allow-methods': 'GET'
+            });
+            expect(response.headers).to.include({
+                'access-control-allow-headers': 'Accept,Authorization,Content-Type,If-None-Match'
             });
 
             done();
