@@ -321,7 +321,8 @@ describe('Versioning', () => {
             },
             config: {
                 cors: {
-                    origin: ['*']
+                    origin: ['*'],
+                    headers: ['Accept', 'Authorization']
                 }
             }
         });
@@ -533,12 +534,12 @@ describe('Versioning', () => {
             expect(response.headers).to.include({
                 'access-control-allow-origin': 'http://www.example.com'
             });
-            expect(response.headers).to.include({
-                'access-control-allow-methods': 'GET'
-            });
-            expect(response.headers).to.include({
-                'access-control-allow-headers': 'Accept,Authorization,Content-Type,If-None-Match'
-            });
+
+            expect(response.headers).to.include('access-control-allow-methods');
+            expect(response.headers['access-control-allow-methods'].split(',')).to.include('GET');
+
+            expect(response.headers).to.include('access-control-allow-headers');
+            expect(response.headers['access-control-allow-headers'].split(',')).to.include(['Accept', 'Authorization']);
 
             done();
         });
