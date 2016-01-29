@@ -46,6 +46,16 @@ const _extractVersionFromAcceptHeader = function (request, options) {
     return null;
 };
 
+//Checks if server.match returns expected versioned route
+const _isRouteVersioned = function (route, versionedPath) {
+
+    const fingerprint = route ? route.fingerprint : '';
+    const fingerprintItems = fingerprint.split('/'); //Split to account for path parameters
+    const versionedPathItems = versionedPath.split('/'); //Split to account for path parameters
+
+    return fingerprintItems.length === versionedPathItems.length;
+};
+
 exports.register = function (server, options, next) {
 
     const validateOptions = internals.optionsSchema.validate(options);
@@ -82,7 +92,9 @@ exports.register = function (server, options, next) {
 
         const route = server.match(request.method, versionedPath);
 
-        if (route && route.path === versionedPath) {
+        const validMatch = _isRouteVersioned(route, versionedPath);
+
+        if (validMatch) {
             request.setUrl('/v' + requestedVersion + request.url.path); //required to preserve query parameters
         }
 

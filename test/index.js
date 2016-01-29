@@ -327,6 +327,24 @@ describe('Versioning', () => {
             }
         });
 
+        server.route({
+            method: 'GET',
+            path: '/{unversionedPathParam}',
+            handler: function (request, reply) {
+
+                return reply(request.params.unversionedPathParam);
+            }
+        });
+
+        server.route({
+            method: 'GET',
+            path: '/v1/versioned/{versionedPathParam}/withPathParams',
+            handler: function (request, reply) {
+
+                return reply(request.params.versionedPathParam);
+            }
+        });
+
         done();
     });
 
@@ -540,6 +558,41 @@ describe('Versioning', () => {
 
             expect(response.headers).to.include('access-control-allow-headers');
             expect(response.headers['access-control-allow-headers'].split(',')).to.include(['Accept', 'Authorization']);
+
+            done();
+        });
+    });
+
+    it('resolves unversioned routes with path parameters', (done) => {
+
+        const pathParam = '123456789';
+
+        server.inject({
+            method: 'GET',
+            url: '/' + pathParam
+        }, (response) => {
+
+            expect(response.statusCode).to.equal(200);
+            expect(response.payload).to.equal(pathParam);
+
+            done();
+        });
+    });
+
+    it('resolves versioned routes with path parameters', (done) => {
+
+        const pathParam = '123456789';
+
+        server.inject({
+            method: 'GET',
+            url: '/versioned/' + pathParam + '/withPathParams',
+            headers: {
+                'api-version': '1'
+            }
+        }, (response) => {
+
+            expect(response.statusCode).to.equal(200);
+            expect(response.payload).to.equal(pathParam);
 
             done();
         });
