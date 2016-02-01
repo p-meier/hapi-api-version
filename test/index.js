@@ -327,6 +327,90 @@ describe('Versioning', () => {
             }
         });
 
+        server.route({
+            method: 'GET',
+            path: '/unversioned/{catchAll*}',
+            handler: function (request, reply) {
+
+                const response = {
+                    version: request.pre.apiVersion,
+                    data: 'unversionedCatchAll'
+                };
+
+                return reply(response);
+            }
+        });
+
+        server.route({
+            method: 'GET',
+            path: '/v2/versioned/{catchAll*}',
+            handler: function (request, reply) {
+
+                const response = {
+                    version: request.pre.apiVersion,
+                    data: 'versionedCatchAll'
+                };
+
+                return reply(response);
+            }
+        });
+
+        server.route({
+            method: 'GET',
+            path: '/unversioned/{unversionedPathParam}',
+            handler: function (request, reply) {
+
+                const response = {
+                    version: request.pre.apiVersion,
+                    data: request.params.unversionedPathParam
+                };
+
+                return reply(response);
+            }
+        });
+
+        server.route({
+            method: 'GET',
+            path: '/v1/versioned/{versionedPathParam}/withPathParams',
+            handler: function (request, reply) {
+
+                const response = {
+                    version: request.pre.apiVersion,
+                    data: request.params.versionedPathParam
+                };
+
+                return reply(response);
+            }
+        });
+
+        server.route({
+            method: 'GET',
+            path: '/v2/versioned/{segment*2}/withPathParams',
+            handler: function (request, reply) {
+
+                const response = {
+                    version: request.pre.apiVersion,
+                    data: request.params.segment
+                };
+
+                return reply(response);
+            }
+        });
+
+        server.route({
+            method: 'GET',
+            path: '/v2/versioned/optionalPathParam/{optional?}',
+            handler: function (request, reply) {
+
+                const response = {
+                    version: request.pre.apiVersion,
+                    data: request.params.optional
+                };
+
+                return reply(response);
+            }
+        });
+
         done();
     });
 
@@ -544,5 +628,123 @@ describe('Versioning', () => {
             done();
         });
     });
+
+    it('resolves unversioned catch all routes', (done) => {
+
+        server.inject({
+            method: 'GET',
+            url: '/unversioned/catch/all/route'
+        }, (response) => {
+
+            expect(response.statusCode).to.equal(200);
+            expect(response.result.version).to.equal(1);
+            expect(response.result.data).to.equal('unversionedCatchAll');
+
+            done();
+
+        });
+    });
+
+    it('resolves versioned catch all routes', (done) => {
+
+        const apiVersion = 2;
+
+        server.inject({
+            method: 'GET',
+            url: '/versioned/catch/all/route',
+            headers: {
+                'api-version': apiVersion
+            }
+        }, (response) => {
+
+            expect(response.statusCode).to.equal(200);
+            expect(response.result.version).to.equal(apiVersion);
+            expect(response.result.data).to.equal('versionedCatchAll');
+
+            done();
+
+        });
+    });
+
+    it('resolves unversioned routes with path parameters', (done) => {
+
+        const pathParam = '123456789';
+
+        server.inject({
+            method: 'GET',
+            url: '/unversioned/' + pathParam
+        }, (response) => {
+
+            expect(response.statusCode).to.equal(200);
+            expect(response.result.version).to.equal(1);
+            expect(response.result.data).to.equal(pathParam);
+
+            done();
+        });
+    });
+
+    it('resolves versioned routes with path parameters', (done) => {
+
+        const pathParam = '123456789';
+        const apiVersion = 1;
+
+        server.inject({
+            method: 'GET',
+            url: '/versioned/' + pathParam + '/withPathParams',
+            headers: {
+                'api-version': apiVersion
+            }
+        }, (response) => {
+
+            expect(response.statusCode).to.equal(200);
+            expect(response.result.version).to.equal(apiVersion);
+            expect(response.result.data).to.equal(pathParam);
+
+            done();
+        });
+    });
+
+    it('resolves multi segment path parameters', (done) => {
+
+        const apiVersion = 2;
+        const pathParam = 'multi/segment';
+
+        server.inject({
+            method: 'GET',
+            url: '/versioned/' + pathParam + '/withPathParams',
+            headers: {
+                'api-version': apiVersion
+            }
+        }, (response) => {
+
+            expect(response.statusCode).to.equal(200);
+            expect(response.result.version).to.equal(apiVersion);
+            expect(response.result.data).to.equal(pathParam);
+
+            done();
+        });
+    });
+
+    it('resolves optional path parameters', (done) => {
+
+        const apiVersion = 2;
+        const pathParam = undefined;
+
+        server.inject({
+            method: 'GET',
+            url: '/versioned/optionalPathParam/',
+            headers: {
+                'api-version': apiVersion
+            }
+        }, (response) => {
+
+            expect(response.statusCode).to.equal(200);
+            expect(response.result.version).to.equal(apiVersion);
+            expect(response.result.data).to.equal(pathParam);
+
+            done();
+        });
+    });
+
 
 });

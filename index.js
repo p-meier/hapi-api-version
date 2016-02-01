@@ -77,12 +77,18 @@ exports.register = function (server, options, next) {
             requestedVersion = options.defaultVersion;
         }
 
-
         const versionedPath = '/v' + requestedVersion + request.path;
 
         const route = server.match(request.method, versionedPath);
 
-        if (route && route.path === versionedPath) {
+        let versionedRoute = false;
+
+        //Check if returned route's path contains version
+        if (!!route && route.hasOwnProperty('path')) {
+            versionedRoute = route.path.indexOf('/v' + requestedVersion + '/') === 0;
+        }
+
+        if (versionedRoute) {
             request.setUrl('/v' + requestedVersion + request.url.path); //required to preserve query parameters
         }
 
