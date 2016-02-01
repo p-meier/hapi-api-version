@@ -725,7 +725,7 @@ describe('Versioning', () => {
         });
     });
 
-    it('resolves optional path parameters', (done) => {
+    it('resolves optional path parameters - without optional value', (done) => {
 
         const apiVersion = 2;
         const pathParam = undefined;
@@ -746,5 +746,25 @@ describe('Versioning', () => {
         });
     });
 
+    it('resolves optional path parameters - with optional value', (done) => {
+
+        const apiVersion = 2;
+        const pathParam = 'test';
+
+        server.inject({
+            method: 'GET',
+            url: '/versioned/optionalPathParam/' + pathParam,
+            headers: {
+                'api-version': apiVersion
+            }
+        }, (response) => {
+
+            expect(response.statusCode).to.equal(200);
+            expect(response.result.version).to.equal(apiVersion);
+            expect(response.result.data).to.equal(pathParam);
+
+            done();
+        });
+    });
 
 });
