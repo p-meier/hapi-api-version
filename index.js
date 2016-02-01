@@ -81,14 +81,15 @@ exports.register = function (server, options, next) {
 
         const route = server.match(request.method, versionedPath);
 
+        let versionedRoute = false;
+
+        //Check if returned route's path contains version
         if (!!route && route.hasOwnProperty('path')) {
+            versionedRoute = route.path.indexOf('/v' + requestedVersion + '/') === 0;
+        }
 
-            //Check if returned route's path contains version
-            const versionedRoute = route.path.indexOf('/v' + requestedVersion + '/') === 0;
-
-            if (versionedRoute) {
-                request.setUrl('/v' + requestedVersion + request.url.path); //required to preserve query parameters
-            }
+        if (versionedRoute) {
+            request.setUrl('/v' + requestedVersion + request.url.path); //required to preserve query parameters
         }
 
         //Set version for usage in handler
