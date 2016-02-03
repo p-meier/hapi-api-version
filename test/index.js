@@ -257,6 +257,233 @@ describe('Versioning', () => {
             }
         });
 
+        done();
+    });
+
+    describe(' -> basic versioning', () => {
+
+        beforeEach((done) => {
+
+            server.route({
+                method: 'GET',
+                path: '/unversioned',
+                handler: function (request, reply) {
+
+                    const response = {
+                        version: request.pre.apiVersion,
+                        data: 'unversioned'
+                    };
+
+                    return reply(response);
+                }
+            });
+
+            server.route({
+                method: 'GET',
+                path: '/v1/versioned',
+                handler: function (request, reply) {
+
+                    const response = {
+                        version: 1,
+                        data: 'versioned'
+                    };
+
+                    return reply(response);
+                }
+            });
+
+            server.route({
+                method: 'GET',
+                path: '/v2/versioned',
+                handler: function (request, reply) {
+
+                    const response = {
+                        version: 2,
+                        data: 'versioned'
+                    };
+
+                    return reply(response);
+                }
+            });
+
+            done();
+        });
+
+        it('returns version 2 if custom header is valid', (done) => {
+
+            server.inject({
+                method: 'GET',
+                url: '/versioned',
+                headers: {
+                    'api-version': '2'
+                }
+            }, (response) => {
+
+                expect(response.statusCode).to.equal(200);
+                expect(response.result.version).to.equal(2);
+                expect(response.result.data).to.equal('versioned');
+
+                done();
+            });
+        });
+
+        it('returns version 2 if accept header is valid', (done) => {
+
+            server.inject({
+                method: 'GET',
+                url: '/versioned',
+                headers: {
+                    'Accept': 'application/vnd.mysuperapi.v2+json'
+                }
+            }, (response) => {
+
+                expect(response.statusCode).to.equal(200);
+                expect(response.result.version).to.equal(2);
+                expect(response.result.data).to.equal('versioned');
+
+                done();
+            });
+        });
+
+        it('returns default version if no header is sent', (done) => {
+
+            server.inject({
+                method: 'GET',
+                url: '/versioned'
+            }, (response) => {
+
+                expect(response.statusCode).to.equal(200);
+                expect(response.result.version).to.equal(1);
+                expect(response.result.data).to.equal('versioned');
+
+                done();
+            });
+        });
+
+        it('returns default version if custom header is invalid', (done) => {
+
+            server.inject({
+                method: 'GET',
+                url: '/versioned',
+                headers: {
+                    'api-version': 'asdf'
+                }
+            }, (response) => {
+
+                expect(response.statusCode).to.equal(200);
+                expect(response.result.version).to.equal(1);
+                expect(response.result.data).to.equal('versioned');
+
+                done();
+            });
+        });
+
+        it('returns default version if accept header is invalid', (done) => {
+
+            server.inject({
+                method: 'GET',
+                url: '/versioned',
+                headers: {
+                    'Accept': 'application/someinvalidapi.vasf+json'
+                }
+            }, (response) => {
+
+                expect(response.statusCode).to.equal(200);
+                expect(response.result.version).to.equal(1);
+                expect(response.result.data).to.equal('versioned');
+
+                done();
+            });
+        });
+
+        it('returns default version if accept header has an invalid vendor-name', (done) => {
+
+            server.inject({
+                method: 'GET',
+                url: '/versioned',
+                headers: {
+                    'Accept': 'application/vnd.someinvalidapi.v2+json'
+                }
+            }, (response) => {
+
+                expect(response.statusCode).to.equal(200);
+                expect(response.result.version).to.equal(1);
+                expect(response.result.data).to.equal('versioned');
+
+                done();
+            });
+        });
+
+        it('returns a 400 if invalid api version is requested (not included in validVersions)', (done) => {
+
+            server.inject({
+                method: 'GET',
+                url: '/versioned',
+                headers: {
+                    'api-version': '3'
+                }
+            }, (response) => {
+
+                expect(response.statusCode).to.equal(400);
+
+                done();
+            });
+        });
+
+        it('returns the same response for an unversioned route no matter what version is requested - version 1', (done) => {
+
+            server.inject({
+                method: 'GET',
+                url: '/unversioned',
+                headers: {
+                    'api-version': '1'
+                }
+            }, (response) => {
+
+                expect(response.statusCode).to.equal(200);
+                expect(response.result.version).to.equal(1);
+                expect(response.result.data).to.equal('unversioned');
+
+                done();
+            });
+        });
+
+        it('returns the same response for an unversioned route no matter what version is requested - version 2', (done) => {
+
+            server.inject({
+                method: 'GET',
+                url: '/unversioned',
+                headers: {
+                    'api-version': '2'
+                }
+            }, (response) => {
+
+                expect(response.statusCode).to.equal(200);
+                expect(response.result.version).to.equal(2);
+                expect(response.result.data).to.equal('unversioned');
+
+                done();
+            });
+        });
+
+        it('returns the same response for an unversioned route no matter what version is requested - no version (=default)', (done) => {
+
+            server.inject({
+                method: 'GET',
+                url: '/unversioned'
+            }, (response) => {
+
+                expect(response.statusCode).to.equal(200);
+                expect(response.result.version).to.equal(1);
+                expect(response.result.data).to.equal('unversioned');
+
+                done();
+            });
+        });
+    });
+
+    it('preserves query parameters after url-rewrite', (done) => {
+
         server.route({
             method: 'GET',
             path: '/v1/versionedWithParams',
@@ -269,324 +496,6 @@ describe('Versioning', () => {
                 return reply(response);
             }
         });
-
-        server.route({
-            method: 'GET',
-            path: '/unversioned',
-            handler: function (request, reply) {
-
-                const response = {
-                    version: request.pre.apiVersion,
-                    data: 'unversioned'
-                };
-
-                return reply(response);
-            }
-        });
-
-        server.route({
-            method: 'GET',
-            path: '/v1/versioned',
-            handler: function (request, reply) {
-
-                const response = {
-                    version: 1,
-                    data: 'versioned'
-                };
-
-                return reply(response);
-            }
-        });
-
-        server.route({
-            method: 'GET',
-            path: '/v2/versioned',
-            handler: function (request, reply) {
-
-                const response = {
-                    version: 2,
-                    data: 'versioned'
-                };
-
-                return reply(response);
-            }
-        });
-
-        server.route({
-            method: 'GET',
-            path: '/corstest',
-            handler: function (request, reply) {
-
-                return reply('Testing CORS!');
-            },
-            config: {
-                cors: {
-                    origin: ['*'],
-                    headers: ['Accept', 'Authorization']
-                }
-            }
-        });
-
-        server.route({
-            method: 'GET',
-            path: '/unversioned/{catchAll*}',
-            handler: function (request, reply) {
-
-                const response = {
-                    version: request.pre.apiVersion,
-                    data: 'unversionedCatchAll'
-                };
-
-                return reply(response);
-            }
-        });
-
-        server.route({
-            method: 'GET',
-            path: '/v2/versioned/{catchAll*}',
-            handler: function (request, reply) {
-
-                const response = {
-                    version: request.pre.apiVersion,
-                    data: 'versionedCatchAll'
-                };
-
-                return reply(response);
-            }
-        });
-
-        server.route({
-            method: 'GET',
-            path: '/unversioned/{unversionedPathParam}',
-            handler: function (request, reply) {
-
-                const response = {
-                    version: request.pre.apiVersion,
-                    data: request.params.unversionedPathParam
-                };
-
-                return reply(response);
-            }
-        });
-
-        server.route({
-            method: 'GET',
-            path: '/v1/versioned/{versionedPathParam}/withPathParams',
-            handler: function (request, reply) {
-
-                const response = {
-                    version: request.pre.apiVersion,
-                    data: request.params.versionedPathParam
-                };
-
-                return reply(response);
-            }
-        });
-
-        server.route({
-            method: 'GET',
-            path: '/v2/versioned/{segment*2}/withPathParams',
-            handler: function (request, reply) {
-
-                const response = {
-                    version: request.pre.apiVersion,
-                    data: request.params.segment
-                };
-
-                return reply(response);
-            }
-        });
-
-        server.route({
-            method: 'GET',
-            path: '/v2/versioned/optionalPathParam/{optional?}',
-            handler: function (request, reply) {
-
-                const response = {
-                    version: request.pre.apiVersion,
-                    data: request.params.optional
-                };
-
-                return reply(response);
-            }
-        });
-
-        done();
-    });
-
-    it('returns version 2 if custom header is valid', (done) => {
-
-        server.inject({
-            method: 'GET',
-            url: '/versioned',
-            headers: {
-                'api-version': '2'
-            }
-        }, (response) => {
-
-            expect(response.statusCode).to.equal(200);
-            expect(response.result.version).to.equal(2);
-            expect(response.result.data).to.equal('versioned');
-
-            done();
-        });
-    });
-
-    it('returns version 2 if accept header is valid', (done) => {
-
-        server.inject({
-            method: 'GET',
-            url: '/versioned',
-            headers: {
-                'Accept': 'application/vnd.mysuperapi.v2+json'
-            }
-        }, (response) => {
-
-            expect(response.statusCode).to.equal(200);
-            expect(response.result.version).to.equal(2);
-            expect(response.result.data).to.equal('versioned');
-
-            done();
-        });
-    });
-
-    it('returns default version if no header is sent', (done) => {
-
-        server.inject({
-            method: 'GET',
-            url: '/versioned'
-        }, (response) => {
-
-            expect(response.statusCode).to.equal(200);
-            expect(response.result.version).to.equal(1);
-            expect(response.result.data).to.equal('versioned');
-
-            done();
-        });
-    });
-
-    it('returns default version if custom header is invalid', (done) => {
-
-        server.inject({
-            method: 'GET',
-            url: '/versioned',
-            headers: {
-                'api-version': 'asdf'
-            }
-        }, (response) => {
-
-            expect(response.statusCode).to.equal(200);
-            expect(response.result.version).to.equal(1);
-            expect(response.result.data).to.equal('versioned');
-
-            done();
-        });
-    });
-
-    it('returns default version if accept header is invalid', (done) => {
-
-        server.inject({
-            method: 'GET',
-            url: '/versioned',
-            headers: {
-                'Accept': 'application/someinvalidapi.vasf+json'
-            }
-        }, (response) => {
-
-            expect(response.statusCode).to.equal(200);
-            expect(response.result.version).to.equal(1);
-            expect(response.result.data).to.equal('versioned');
-
-            done();
-        });
-    });
-
-    it('returns default version if accept header has an invalid vendor-name', (done) => {
-
-        server.inject({
-            method: 'GET',
-            url: '/versioned',
-            headers: {
-                'Accept': 'application/vnd.someinvalidapi.v2+json'
-            }
-        }, (response) => {
-
-            expect(response.statusCode).to.equal(200);
-            expect(response.result.version).to.equal(1);
-            expect(response.result.data).to.equal('versioned');
-
-            done();
-        });
-    });
-
-    it('returns a 400 if invalid api version is requested (not included in validVersions)', (done) => {
-
-        server.inject({
-            method: 'GET',
-            url: '/versioned',
-            headers: {
-                'api-version': '3'
-            }
-        }, (response) => {
-
-            expect(response.statusCode).to.equal(400);
-
-            done();
-        });
-    });
-
-    it('returns the same response for an unversioned route no matter what version is requested - version 1', (done) => {
-
-        server.inject({
-            method: 'GET',
-            url: '/unversioned',
-            headers: {
-                'api-version': '1'
-            }
-        }, (response) => {
-
-            expect(response.statusCode).to.equal(200);
-            expect(response.result.version).to.equal(1);
-            expect(response.result.data).to.equal('unversioned');
-
-            done();
-        });
-    });
-
-    it('returns the same response for an unversioned route no matter what version is requested - version 2', (done) => {
-
-        server.inject({
-            method: 'GET',
-            url: '/unversioned',
-            headers: {
-                'api-version': '2'
-            }
-        }, (response) => {
-
-            expect(response.statusCode).to.equal(200);
-            expect(response.result.version).to.equal(2);
-            expect(response.result.data).to.equal('unversioned');
-
-            done();
-        });
-    });
-
-    it('returns the same response for an unversioned route no matter what version is requested - no version (=default)', (done) => {
-
-        server.inject({
-            method: 'GET',
-            url: '/unversioned'
-        }, (response) => {
-
-            expect(response.statusCode).to.equal(200);
-            expect(response.result.version).to.equal(1);
-            expect(response.result.data).to.equal('unversioned');
-
-            done();
-        });
-    });
-
-    it('preserves query parameters after url-rewrite', (done) => {
 
         server.inject({
             method: 'GET',
@@ -603,6 +512,21 @@ describe('Versioning', () => {
     });
 
     it('should work with CORS enabled', (done) => {
+
+        server.route({
+            method: 'GET',
+            path: '/corstest',
+            handler: function (request, reply) {
+
+                return reply('Testing CORS!');
+            },
+            config: {
+                cors: {
+                    origin: ['*'],
+                    headers: ['Accept', 'Authorization']
+                }
+            }
+        });
 
         server.inject({
             method: 'OPTIONS',
@@ -629,142 +553,231 @@ describe('Versioning', () => {
         });
     });
 
-    it('resolves unversioned catch all routes', (done) => {
+    describe(' -> path parameters', () => {
 
-        server.inject({
-            method: 'GET',
-            url: '/unversioned/catch/all/route'
-        }, (response) => {
+        beforeEach((done) => {
 
-            expect(response.statusCode).to.equal(200);
-            expect(response.result.version).to.equal(1);
-            expect(response.result.data).to.equal('unversionedCatchAll');
+            server.route({
+                method: 'GET',
+                path: '/unversioned/{catchAll*}',
+                handler: function (request, reply) {
 
-            done();
+                    const response = {
+                        version: request.pre.apiVersion,
+                        data: 'unversionedCatchAll'
+                    };
 
-        });
-    });
+                    return reply(response);
+                }
+            });
 
-    it('resolves versioned catch all routes', (done) => {
+            server.route({
+                method: 'GET',
+                path: '/v2/versioned/{catchAll*}',
+                handler: function (request, reply) {
 
-        const apiVersion = 2;
+                    const response = {
+                        version: request.pre.apiVersion,
+                        data: 'versionedCatchAll'
+                    };
 
-        server.inject({
-            method: 'GET',
-            url: '/versioned/catch/all/route',
-            headers: {
-                'api-version': apiVersion
-            }
-        }, (response) => {
+                    return reply(response);
+                }
+            });
 
-            expect(response.statusCode).to.equal(200);
-            expect(response.result.version).to.equal(apiVersion);
-            expect(response.result.data).to.equal('versionedCatchAll');
+            server.route({
+                method: 'GET',
+                path: '/unversioned/withPathParam/{unversionedPathParam}',
+                handler: function (request, reply) {
 
-            done();
+                    const response = {
+                        version: request.pre.apiVersion,
+                        data: request.params.unversionedPathParam
+                    };
 
-        });
-    });
+                    return reply(response);
+                }
+            });
 
-    it('resolves unversioned routes with path parameters', (done) => {
+            server.route({
+                method: 'GET',
+                path: '/v1/versioned/withPathParam/{versionedPathParam}',
+                handler: function (request, reply) {
 
-        const pathParam = '123456789';
+                    const response = {
+                        version: request.pre.apiVersion,
+                        data: request.params.versionedPathParam
+                    };
 
-        server.inject({
-            method: 'GET',
-            url: '/unversioned/' + pathParam
-        }, (response) => {
+                    return reply(response);
+                }
+            });
 
-            expect(response.statusCode).to.equal(200);
-            expect(response.result.version).to.equal(1);
-            expect(response.result.data).to.equal(pathParam);
+            server.route({
+                method: 'GET',
+                path: '/v2/versioned/multiSegment/{segment*2}',
+                handler: function (request, reply) {
 
-            done();
-        });
-    });
+                    const response = {
+                        version: request.pre.apiVersion,
+                        data: request.params.segment
+                    };
 
-    it('resolves versioned routes with path parameters', (done) => {
+                    return reply(response);
+                }
+            });
 
-        const pathParam = '123456789';
-        const apiVersion = 1;
+            server.route({
+                method: 'GET',
+                path: '/v2/versioned/optionalPathParam/{optional?}',
+                handler: function (request, reply) {
 
-        server.inject({
-            method: 'GET',
-            url: '/versioned/' + pathParam + '/withPathParams',
-            headers: {
-                'api-version': apiVersion
-            }
-        }, (response) => {
+                    const response = {
+                        version: request.pre.apiVersion,
+                        data: request.params.optional
+                    };
 
-            expect(response.statusCode).to.equal(200);
-            expect(response.result.version).to.equal(apiVersion);
-            expect(response.result.data).to.equal(pathParam);
-
-            done();
-        });
-    });
-
-    it('resolves multi segment path parameters', (done) => {
-
-        const apiVersion = 2;
-        const pathParam = 'multi/segment';
-
-        server.inject({
-            method: 'GET',
-            url: '/versioned/' + pathParam + '/withPathParams',
-            headers: {
-                'api-version': apiVersion
-            }
-        }, (response) => {
-
-            expect(response.statusCode).to.equal(200);
-            expect(response.result.version).to.equal(apiVersion);
-            expect(response.result.data).to.equal(pathParam);
+                    return reply(response);
+                }
+            });
 
             done();
         });
-    });
 
-    it('resolves optional path parameters - without optional value', (done) => {
+        it('resolves unversioned catch all routes', (done) => {
 
-        const apiVersion = 2;
-        const pathParam = undefined;
+            server.inject({
+                method: 'GET',
+                url: '/unversioned/catch/all/route'
+            }, (response) => {
 
-        server.inject({
-            method: 'GET',
-            url: '/versioned/optionalPathParam/',
-            headers: {
-                'api-version': apiVersion
-            }
-        }, (response) => {
+                expect(response.statusCode).to.equal(200);
+                expect(response.result.version).to.equal(1);
+                expect(response.result.data).to.equal('unversionedCatchAll');
 
-            expect(response.statusCode).to.equal(200);
-            expect(response.result.version).to.equal(apiVersion);
-            expect(response.result.data).to.equal(pathParam);
+                done();
+            });
+        });
 
-            done();
+        it('resolves versioned catch all routes', (done) => {
+
+            const apiVersion = 2;
+
+            server.inject({
+                method: 'GET',
+                url: '/versioned/catch/all/route',
+                headers: {
+                    'api-version': apiVersion
+                }
+            }, (response) => {
+
+                expect(response.statusCode).to.equal(200);
+                expect(response.result.version).to.equal(apiVersion);
+                expect(response.result.data).to.equal('versionedCatchAll');
+
+                done();
+            });
+        });
+
+        it('resolves unversioned routes with path parameters', (done) => {
+
+            const pathParam = '123456789';
+
+            server.inject({
+                method: 'GET',
+                url: '/unversioned/withPathParam/' + pathParam
+            }, (response) => {
+
+                expect(response.statusCode).to.equal(200);
+                expect(response.result.version).to.equal(1);
+                expect(response.result.data).to.equal(pathParam);
+
+                done();
+            });
+        });
+
+        it('resolves versioned routes with path parameters', (done) => {
+
+            const pathParam = '123456789';
+            const apiVersion = 1;
+
+            server.inject({
+                method: 'GET',
+                url: '/versioned/withPathParam/' + pathParam,
+                headers: {
+                    'api-version': apiVersion
+                }
+            }, (response) => {
+
+                expect(response.statusCode).to.equal(200);
+                expect(response.result.version).to.equal(apiVersion);
+                expect(response.result.data).to.equal(pathParam);
+
+                done();
+            });
+        });
+
+        it('resolves multi segment path parameters', (done) => {
+
+            const apiVersion = 2;
+            const pathParam = 'multi/segment';
+
+            server.inject({
+                method: 'GET',
+                url: '/versioned/multiSegment/' + pathParam,
+                headers: {
+                    'api-version': apiVersion
+                }
+            }, (response) => {
+
+                expect(response.statusCode).to.equal(200);
+                expect(response.result.version).to.equal(apiVersion);
+                expect(response.result.data).to.equal(pathParam);
+
+                done();
+            });
+        });
+
+        it('resolves optional path parameters - without optional value', (done) => {
+
+            const apiVersion = 2;
+            const pathParam = undefined;
+
+            server.inject({
+                method: 'GET',
+                url: '/versioned/optionalPathParam/',
+                headers: {
+                    'api-version': apiVersion
+                }
+            }, (response) => {
+
+                expect(response.statusCode).to.equal(200);
+                expect(response.result.version).to.equal(apiVersion);
+                expect(response.result.data).to.equal(pathParam);
+
+                done();
+            });
+        });
+
+        it('resolves optional path parameters - with optional value', (done) => {
+
+            const apiVersion = 2;
+            const pathParam = 'test';
+
+            server.inject({
+                method: 'GET',
+                url: '/versioned/optionalPathParam/' + pathParam,
+                headers: {
+                    'api-version': apiVersion
+                }
+            }, (response) => {
+
+                expect(response.statusCode).to.equal(200);
+                expect(response.result.version).to.equal(apiVersion);
+                expect(response.result.data).to.equal(pathParam);
+
+                done();
+            });
         });
     });
-
-    it('resolves optional path parameters - with optional value', (done) => {
-
-        const apiVersion = 2;
-        const pathParam = 'test';
-
-        server.inject({
-            method: 'GET',
-            url: '/versioned/optionalPathParam/' + pathParam,
-            headers: {
-                'api-version': apiVersion
-            }
-        }, (response) => {
-
-            expect(response.statusCode).to.equal(200);
-            expect(response.result.version).to.equal(apiVersion);
-            expect(response.result.data).to.equal(pathParam);
-
-            done();
-        });
-    });
-
 });
