@@ -7,24 +7,12 @@ const MediaType = require('media-type');
 
 const Package = require('./package');
 
-const _acceptHeader = {
-    subtypeTest: /^vnd.[a-zA-Z0-9]+\.v[0-9]+$/,
-    extractVersion: function (media) {
-
-        return  media.subtypeFacets[2].replace('v', '');
-    }
-};
-
 const internals = {
     optionsSchema: Joi.object({
         validVersions: Joi.array().items(Joi.number().integer()).min(1).required(),
         defaultVersion: Joi.any().valid(Joi.ref('validVersions')).required(),
         vendorName: Joi.string().trim().min(1).required(),
-        versionHeader: Joi.string().trim().min(1).default('api-version'),
-        acceptHeader: Joi.object({
-            subtypeTest: Joi.object().type(RegExp).default(_acceptHeader.subtypeTest),
-            extractVersion: Joi.func().arity(1).default(_acceptHeader.extractVersion)
-        }).default(_acceptHeader)
+        versionHeader: Joi.string().trim().min(1).default('api-version')
     })
 };
 
@@ -44,13 +32,13 @@ const _extractVersionFromAcceptHeader = function (request, options) {
     const acceptHeader = request.headers.accept;
     const media = MediaType.fromString(acceptHeader);
 
-    if (media.isValid() && (options.acceptHeader.subtypeTest).test(media.subtype)) {
+    if (media.isValid() && (/^vnd.[a-zA-Z0-9]+\.v[0-9]+$/).test(media.subtype)) {
 
         if (media.subtypeFacets[1] !== options.vendorName) {
             return null;
         }
 
-        const version = options.acceptHeader.extractVersion(media);
+        const version = media.subtypeFacets[2].replace('v', '');
 
         return parseInt(version);
     }
