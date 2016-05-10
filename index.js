@@ -12,7 +12,8 @@ const internals = {
         validVersions: Joi.array().items(Joi.number().integer()).min(1).required(),
         defaultVersion: Joi.any().valid(Joi.ref('validVersions')).required(),
         vendorName: Joi.string().trim().min(1).required(),
-        versionHeader: Joi.string().trim().min(1).default('api-version')
+        versionHeader: Joi.string().trim().min(1).default('api-version'),
+        passiveMode: Joi.boolean().default(false)
     })
 };
 
@@ -65,6 +66,11 @@ exports.register = function (server, options, next) {
         //If no version check accept header
         if (!requestedVersion) {
             requestedVersion = _extractVersionFromAcceptHeader(request, options);
+        }
+
+        //If passive mode skips the rest for non versioned routes
+        if (options.passiveMode === true && !requestedVersion) {
+            return reply.continue();
         }
 
         //If there was a version by now check if it is valid
