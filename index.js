@@ -13,7 +13,8 @@ const internals = {
         defaultVersion: Joi.any().valid(Joi.ref('validVersions')).required(),
         vendorName: Joi.string().trim().min(1).required(),
         versionHeader: Joi.string().trim().min(1).default('api-version'),
-        passiveMode: Joi.boolean().default(false)
+        passiveMode: Joi.boolean().default(false),
+        basePath: Joi.string().trim().min(1).default('/')
     })
 };
 
@@ -83,12 +84,12 @@ exports.register = function (server, options, next) {
             requestedVersion = options.defaultVersion;
         }
 
-        const versionedPath = '/v' + requestedVersion + request.path;
+        const versionedPath = options.basePath + 'v' + requestedVersion + request.path.slice(options.basePath.length - 1);
 
         const route = server.match(request.method, versionedPath);
 
-        if (route && route.path.indexOf('/v' + requestedVersion + '/') === 0) {
-            request.setUrl('/v' + requestedVersion + request.url.path); //required to preserve query parameters
+        if (route && route.path.indexOf(options.basePath + 'v' + requestedVersion + '/') === 0) {
+            request.setUrl(options.basePath + 'v' + requestedVersion + request.url.path.slice(options.basePath.length - 1)); //required to preserve query parameters
         }
 
         //Set version for usage in handler

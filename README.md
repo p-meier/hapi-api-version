@@ -190,6 +190,7 @@ The options for the plugin are validated on plugin registration.
 - `vendorName` (required) is a string. Defines the vendor name used in the `accept` header.
 - `versionHeader` (optional) is a string. Defines the name of the custom header to use. Per default this is `api-version`.
 - `passiveMode` (optional) is a boolean. Allows to bypass when no headers are supplied. Useful when you have serve other content like documentation and reduces overhead on processing those.
+- `basePath` (optional) is a string. In case we have a base path different from `/` (example: `/api/`). Per default this is `/`.
 
 ### Getting the requested API version in the handler
 
