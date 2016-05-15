@@ -203,6 +203,24 @@ describe('Plugin registration', () => {
         });
     });
 
+    it('should fail if passiveMode is not a boolean', (done) => {
+
+        server.register({
+            register: require('../'),
+            options: {
+                validVersions: [1, 2],
+                defaultVersion: 1,
+                vendorName: 33,
+                passiveMode: []
+            }
+        }, (err) => {
+
+            if (err) {
+                done();
+            }
+        });
+    });
+
     it('should succeed if all required options are provided correctly', (done) => {
 
         server.register({
@@ -228,7 +246,8 @@ describe('Plugin registration', () => {
                 validVersions: [1, 2],
                 defaultVersion: 1,
                 vendorName: 'mysuperapi',
-                versionHeader: 'myversion'
+                versionHeader: 'myversion',
+                passiveMode: true
             }
         }, (err) => {
 
@@ -781,3 +800,55 @@ describe('Versioning', () => {
         });
     });
 });
+
+describe('Versioning with passive mode', () => {
+
+    beforeEach((done) => {
+
+        server.register([{
+            register: require('../'),
+            options: {
+                validVersions: [1, 2],
+                defaultVersion: 1,
+                vendorName: 'mysuperapi',
+                passiveMode: true
+            }
+        }], (err) => {
+
+            if (err) {
+                return console.error('Can not register plugins', err);
+            }
+        });
+
+        server.route({
+            method: 'GET',
+            path: '/unversioned',
+            handler: function (request, reply) {
+
+                const response = {
+                    data: 'unversioned'
+                };
+
+                return reply(response);
+            }
+        });
+
+        done();
+    });
+
+    it('returns no version if no header is supplied', (done) => {
+
+        server.inject({
+            method: 'GET',
+            url: '/unversioned'
+        }, (response) => {
+
+            expect(response.statusCode).to.equal(200);
+            expect(response.result.version).to.equal(undefined);
+            expect(response.result.data).to.equal('unversioned');
+
+            done();
+        });
+    });
+});
+
