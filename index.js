@@ -84,12 +84,28 @@ exports.register = function (server, options, next) {
             requestedVersion = options.defaultVersion;
         }
 
-        const versionedPath = options.basePath + 'v' + requestedVersion + request.path.slice(options.basePath.length - 1);
+        if (options.basePath.slice(-1) !== '/') {
+            options.basePath = options.basePath + '/';
+        }
+
+        let versionedPath;
+        let versionedUrl;
+        let requestedBasePath;
+
+        if (options.basePath.indexOf('{') === 1)  {
+            requestedBasePath = request.path.slice(0, request.path.indexOf('/', 1)) + '/';
+            versionedPath = options.basePath + 'v' + requestedVersion + request.path.slice(request.path.indexOf('/', 1));
+            versionedUrl = requestedBasePath + 'v' + requestedVersion + request.url.path.slice(request.path.indexOf('/', 1));
+        }
+        else {
+            versionedPath = options.basePath + 'v' + requestedVersion + request.path.slice(options.basePath.length - 1);
+            versionedUrl = options.basePath + 'v' + requestedVersion + request.url.path.slice(options.basePath.length - 1);
+        }
 
         const route = server.match(request.method, versionedPath);
 
         if (route && route.path.indexOf(options.basePath + 'v' + requestedVersion + '/') === 0) {
-            request.setUrl(options.basePath + 'v' + requestedVersion + request.url.path.slice(options.basePath.length - 1)); //required to preserve query parameters
+            request.setUrl(versionedUrl); //required to preserve query parameters
         }
 
         //Set version for usage in handler
