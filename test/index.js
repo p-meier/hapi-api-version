@@ -260,13 +260,15 @@ describe('Plugin registration', () => {
 
 describe('Versioning', () => {
 
+    const defaultVersion = 0;
+
     beforeEach((done) => {
 
         server.register([{
             register: require('../'),
             options: {
-                validVersions: [1, 2],
-                defaultVersion: 1,
+                validVersions: [0, 1, 2],
+                defaultVersion: defaultVersion,
                 vendorName: 'mysuperapi'
             }
         }], (err) => {
@@ -291,6 +293,20 @@ describe('Versioning', () => {
                     const response = {
                         version: request.pre.apiVersion,
                         data: 'unversioned'
+                    };
+
+                    return reply(response);
+                }
+            });
+
+            server.route({
+                method: 'GET',
+                path: '/v0/versioned',
+                handler: function (request, reply) {
+
+                    const response = {
+                        version: 0,
+                        data: 'versioned'
                     };
 
                     return reply(response);
@@ -326,6 +342,42 @@ describe('Versioning', () => {
             });
 
             done();
+        });
+
+        it('returns version 0 if custom header is valid', (done) => {
+
+            server.inject({
+                method: 'GET',
+                url: '/versioned',
+                headers: {
+                    'api-version': '0'
+                }
+            }, (response) => {
+
+                expect(response.statusCode).to.equal(200);
+                expect(response.result.version).to.equal(0);
+                expect(response.result.data).to.equal('versioned');
+
+                done();
+            });
+        });
+
+        it('returns version 0 if accept header is valid', (done) => {
+
+            server.inject({
+                method: 'GET',
+                url: '/versioned',
+                headers: {
+                    'Accept': 'application/vnd.mysuperapi.v0+json'
+                }
+            }, (response) => {
+
+                expect(response.statusCode).to.equal(200);
+                expect(response.result.version).to.equal(0);
+                expect(response.result.data).to.equal('versioned');
+
+                done();
+            });
         });
 
         it('returns version 2 if custom header is valid', (done) => {
@@ -372,7 +424,7 @@ describe('Versioning', () => {
             }, (response) => {
 
                 expect(response.statusCode).to.equal(200);
-                expect(response.result.version).to.equal(1);
+                expect(response.result.version).to.equal(defaultVersion);
                 expect(response.result.data).to.equal('versioned');
 
                 done();
@@ -390,7 +442,7 @@ describe('Versioning', () => {
             }, (response) => {
 
                 expect(response.statusCode).to.equal(200);
-                expect(response.result.version).to.equal(1);
+                expect(response.result.version).to.equal(defaultVersion);
                 expect(response.result.data).to.equal('versioned');
 
                 done();
@@ -408,7 +460,7 @@ describe('Versioning', () => {
             }, (response) => {
 
                 expect(response.statusCode).to.equal(200);
-                expect(response.result.version).to.equal(1);
+                expect(response.result.version).to.equal(defaultVersion);
                 expect(response.result.data).to.equal('versioned');
 
                 done();
@@ -426,7 +478,7 @@ describe('Versioning', () => {
             }, (response) => {
 
                 expect(response.statusCode).to.equal(200);
-                expect(response.result.version).to.equal(1);
+                expect(response.result.version).to.equal(defaultVersion);
                 expect(response.result.data).to.equal('versioned');
 
                 done();
@@ -493,7 +545,7 @@ describe('Versioning', () => {
             }, (response) => {
 
                 expect(response.statusCode).to.equal(200);
-                expect(response.result.version).to.equal(1);
+                expect(response.result.version).to.equal(defaultVersion);
                 expect(response.result.data).to.equal('unversioned');
 
                 done();
@@ -505,7 +557,7 @@ describe('Versioning', () => {
 
         server.route({
             method: 'GET',
-            path: '/v1/versionedWithParams',
+            path: '/v' + defaultVersion + '/versionedWithParams',
             handler: function (request, reply) {
 
                 const response = {
@@ -671,7 +723,7 @@ describe('Versioning', () => {
             }, (response) => {
 
                 expect(response.statusCode).to.equal(200);
-                expect(response.result.version).to.equal(1);
+                expect(response.result.version).to.equal(defaultVersion);
                 expect(response.result.data).to.equal('unversionedCatchAll');
 
                 done();
@@ -708,7 +760,7 @@ describe('Versioning', () => {
             }, (response) => {
 
                 expect(response.statusCode).to.equal(200);
-                expect(response.result.version).to.equal(1);
+                expect(response.result.version).to.equal(defaultVersion);
                 expect(response.result.data).to.equal(pathParam);
 
                 done();
