@@ -760,7 +760,7 @@ describe('Versioning', () => {
         it('resolves optional path parameters - without optional value', (done) => {
 
             const apiVersion = 2;
-            const pathParam = '';
+            const pathParam = (server.version.indexOf('16.') > -1 ? '' : undefined);
 
             server.inject({
                 method: 'GET',
