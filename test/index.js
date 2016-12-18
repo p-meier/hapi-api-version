@@ -522,7 +522,7 @@ describe('Versioning', () => {
         }, (response) => {
 
             expect(response.statusCode).to.equal(200);
-            expect(response.result.params).to.deep.equal({
+            expect(response.result.params).to.equal({
                 test: '1'
             });
 
@@ -760,7 +760,7 @@ describe('Versioning', () => {
         it('resolves optional path parameters - without optional value', (done) => {
 
             const apiVersion = 2;
-            const pathParam = undefined;
+            const pathParam = '';
 
             server.inject({
                 method: 'GET',
@@ -851,4 +851,3 @@ describe('Versioning with passive mode', () => {
         });
     });
 });
-
