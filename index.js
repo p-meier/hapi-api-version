@@ -48,6 +48,21 @@ const _extractVersionFromAcceptHeader = function (request, options) {
     return null;
 };
 
+//Set a response header containing the version number
+const _addVersionToResponseHeader = function (request, reply, requestedVersion, options) {
+
+    const headerName = options.versionHeader;
+    const response = request.response;
+
+    if (request.response.isBoom) {
+        response.output.headers[headerName] = requestedVersion;
+    }
+    else {
+        response.header(headerName, requestedVersion);
+    }
+    reply.continue();
+};
+
 exports.register = function (server, options, next) {
 
     const validateOptions = internals.optionsSchema.validate(options);
@@ -96,6 +111,11 @@ exports.register = function (server, options, next) {
         request.pre.apiVersion = requestedVersion;
 
         return reply.continue();
+    });
+
+    server.ext('onPreResponse', (request, reply) => {
+
+        _addVersionToResponseHeader(request, reply, request.pre.apiVersion, options);
     });
 
     return next();
