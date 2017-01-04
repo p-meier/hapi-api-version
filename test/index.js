@@ -379,6 +379,41 @@ describe('Versioning', () => {
             });
         });
 
+        it('returns default version response header if no request header is sent', (done) => {
+
+            server.inject({
+                method: 'GET',
+                url: '/versioned'
+            }, (response) => {
+
+                expect(response.statusCode).to.equal(200);
+                expect(response.result.version).to.equal(1);
+                expect(response.result.data).to.equal('versioned');
+                expect(response.headers['api-version']).to.equal(1);
+
+                done();
+            });
+        });
+
+        it('returns version response header if response header is present', (done) => {
+
+            server.inject({
+                method: 'GET',
+                url: '/versioned',
+                headers: {
+                    'api-version': '2'
+                }
+            }, (response) => {
+
+                expect(response.statusCode).to.equal(200);
+                expect(response.result.version).to.equal(2);
+                expect(response.result.data).to.equal('versioned');
+                expect(response.headers['api-version']).to.equal(2);
+
+                done();
+            });
+        });
+
         it('returns default version if custom header is invalid', (done) => {
 
             server.inject({
