@@ -102,7 +102,7 @@ exports.register = function (server, options, next) {
         const versionedPath = options.basePath + 'v' + requestedVersion + request.path.slice(options.basePath.length - 1);
 
         const method = request.method === 'options' ? request.headers['access-control-request-method'] : request.method;
-        
+
         const route = server.match(method, versionedPath);
 
         if (route && route.path.indexOf(options.basePath + 'v' + requestedVersion + '/') === 0) {
