@@ -1,5 +1,7 @@
 # hapi-api-version
 
+__Searching for a new lead maintainer. If you are interested email me at: me[at]patrick-meier.io__
+
 [![Build Status](https://travis-ci.org/p-meier/hapi-api-version.svg?branch=master)](https://travis-ci.org/p-meier/hapi-api-version)
 
 An API versioning plugin for [hapi](http://hapijs.com/).
