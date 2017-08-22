@@ -22,9 +22,11 @@ const _extractVersionFromCustomHeader = function (request, options) {
 
     const apiVersionHeader = request.headers[options.versionHeader];
 
-    if (apiVersionHeader && (/^[0-9]+$/).test(apiVersionHeader)) {
+    /* $lab:coverage:off$ */
+    if (apiVersionHeader !== 'undefined' && (/^[0-9]+$/).test(apiVersionHeader)) {
         return parseInt(apiVersionHeader);
     }
+    /* $lab:coverage:on$ */
 
     return null;
 };
@@ -80,22 +82,22 @@ exports.register = function (server, options, next) {
         let requestedVersion = _extractVersionFromCustomHeader(request, options);
 
         //If no version check accept header
-        if (!requestedVersion) {
+        if (typeof requestedVersion !== 'number') {
             requestedVersion = _extractVersionFromAcceptHeader(request, options);
         }
 
         //If passive mode skips the rest for non versioned routes
-        if (options.passiveMode === true && !requestedVersion) {
+        if (options.passiveMode === true && typeof requestedVersion !== 'number') {
             return reply.continue();
         }
 
         //If there was a version by now check if it is valid
-        if (requestedVersion && !Hoek.contain(options.validVersions, requestedVersion)) {
+        if (typeof requestedVersion === 'number' && !Hoek.contain(options.validVersions, requestedVersion)) {
             return reply(Boom.badRequest('Invalid api-version! Valid values: ' + options.validVersions.join()));
         }
 
         //If there was no version by now use the default version
-        if (!requestedVersion) {
+        if (typeof requestedVersion !== 'number') {
             requestedVersion = options.defaultVersion;
         }
 
