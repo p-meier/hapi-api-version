@@ -1,6 +1,6 @@
 # hapi-api-version
 
-__Searching for a new lead maintainer. If you are interested email me at: me[at]patrick-meier.io__
+__Lead Maintainer: [Tim Costa](https://github.com/timcosta)__
 
 [![Build Status](https://travis-ci.org/p-meier/hapi-api-version.svg?branch=master)](https://travis-ci.org/p-meier/hapi-api-version)
 
