@@ -18,7 +18,7 @@ env:
     - HAPI_VERSION="16"
 
 install:
-    - npm install
-    - npm install hapi@$HAPI_VERSION
+    - npm install --no-package-lock
+    - npm install hapi@$HAPI_VERSION --no-package-lock
 
 sudo: false
