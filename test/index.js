@@ -3,6 +3,7 @@
 const Hapi = require('hapi');
 const Code = require('code');
 const Lab = require('lab');
+
 const lab = exports.lab = Lab.script();
 
 const expect = Code.expect;
@@ -10,202 +11,166 @@ const expect = Code.expect;
 const describe = lab.describe;
 const it = lab.it;
 const beforeEach = lab.beforeEach;
-
 let server;
 
-beforeEach((done) => {
+beforeEach(async () => {
 
-    server = new Hapi.Server();
-    server.connection();
-
-    done();
+    try {
+        server = Hapi.server();
+        await server.start();
+    }
+    catch (err) {
+        console.error(err);
+        process.exit(1);
+    }
 });
 
 describe('Plugin registration', () => {
 
-    it('should fail if no options are specified', (done) => {
+    it('should throw error if no options are specified', (done) => {
 
-        server.register({
-            register: require('../'),
-            options: {}
-        }, (err) => {
-
-            if (err) {
-                done();
-            }
-        });
+        try {
+            server.register({
+                plugin: require('../'),
+                options: {}
+            }).then(() => {
+            }).catch((e) => expect(e).to.be.an.instanceof(Error));
+        }
+        catch (e) {
+            done();
+        };
     });
 
-    it('should fail if no validVersions are specified', (done) => {
 
-        server.register({
+    it('should fail if no options are specified', async () => {
+
+        await expect(server.register({
+            register: require('../'),
+            options: {}
+        })).to.reject(Error, /Invalid plugin options/);
+    });
+
+    it('should fail if no validVersions are specified', async () => {
+
+        await expect(server.register({
             register: require('../'),
             options: {
                 defaultVersion: 1,
                 vendorName: 'mysuperapi'
             }
-        }, (err) => {
-
-            if (err) {
-                done();
-            }
-        });
+        })).to.reject(Error, /Invalid plugin options/);
     });
 
-    it('should fail if validVersions is not an array', (done) => {
+    it('should fail if validVersions is not an array', async () => {
 
-        server.register({
+        await expect(server.register({
             register: require('../'),
             options: {
                 validVersions: 1,
                 defaultVersion: 1,
                 vendorName: 'mysuperapi'
             }
-        }, (err) => {
+        })).to.reject(Error, /Invalid plugin options/);
 
-            if (err) {
-                done();
-            }
-        });
     });
 
-    it('should fail if validVersions is an empty array', (done) => {
+    it('should fail if validVersions is an empty array', async () => {
 
-        server.register({
+        await expect(server.register({
             register: require('../'),
             options: {
                 validVersions: [],
                 defaultVersion: 1,
                 vendorName: 'mysuperapi'
             }
-        }, (err) => {
-
-            if (err) {
-                done();
-            }
-        });
+        })).to.reject(Error, /Invalid plugin options/);
     });
 
-    it('should fail if validVersions contains non integer values', (done) => {
+    it('should fail if validVersions contains non integer values', async () => {
 
-        server.register({
+        await expect(server.register({
             register: require('../'),
             options: {
                 validVersions: ['1', 2.2],
                 defaultVersion: 1,
                 vendorName: 'mysuperapi'
             }
-        }, (err) => {
-
-            if (err) {
-                done();
-            }
-        });
+        })).to.reject(Error, /Invalid plugin options/);
     });
 
-    it('should fail if no defaultVersion is specified', (done) => {
+    it('should fail if no defaultVersion is specified', async () => {
 
-        server.register({
+        await expect(server.register({
             register: require('../'),
             options: {
                 validVersions: [1, 2],
                 vendorName: 'mysuperapi'
             }
-        }, (err) => {
-
-            if (err) {
-                done();
-            }
-        });
+        })).to.reject(Error, /Invalid plugin options/);
     });
 
-    it('should fail if defaultVersion is not an integer', (done) => {
+    it('should fail if defaultVersion is not an integer', async () => {
 
-        server.register({
+        await expect(server.register({
             register: require('../'),
             options: {
                 validVersions: [1, 2],
                 defaultVersion: '1',
                 vendorName: 'mysuperapi'
             }
-        }, (err) => {
-
-            if (err) {
-                done();
-            }
-        });
+        })).to.reject(Error, /Invalid plugin options/);
     });
 
-    it('should fail if defaultVersion is not an element of validVersions', (done) => {
+    it('should fail if defaultVersion is not an element of validVersions', async () => {
 
-        server.register({
+        await expect(server.register({
             register: require('../'),
             options: {
                 validVersions: [1, 2],
                 defaultVersion: 3,
                 vendorName: 'mysuperapi'
             }
-        }, (err) => {
-
-            if (err) {
-                done();
-            }
-        });
+        })).to.reject(Error, /Invalid plugin options/);
     });
 
-    it('should fail if defaultVersion is not an element of validVersions', (done) => {
+    it('should fail if defaultVersion is not an element of validVersions', async () => {
 
-        server.register({
+        await expect(server.register({
             register: require('../'),
             options: {
                 validVersions: [1, 2],
                 defaultVersion: 3,
                 vendorName: 'mysuperapi'
             }
-        }, (err) => {
-
-            if (err) {
-                done();
-            }
-        });
+        })).to.reject(Error, /Invalid plugin options/);
     });
 
-    it('should fail if no vendorName is specified', (done) => {
+    it('should fail if no vendorName is specified', async () => {
 
-        server.register({
+        await expect(server.register({
             register: require('../'),
             options: {
                 validVersions: [1, 2],
                 defaultVersion: 1
             }
-        }, (err) => {
-
-            if (err) {
-                done();
-            }
-        });
+        })).to.reject(Error, /Invalid plugin options/);
     });
 
-    it('should fail if vendorName is not a string', (done) => {
+    it('should fail if vendorName is not a string', async () => {
 
-        server.register({
+        await expect(server.register({
             register: require('../'),
             options: {
                 validVersions: [1, 2],
                 defaultVersion: 1,
                 vendorName: 33
             }
-        }, (err) => {
-
-            if (err) {
-                done();
-            }
-        });
+        })).to.reject(Error, /Invalid plugin options/);
     });
 
-    it('should fail if passiveMode is not a boolean', (done) => {
+    it('should fail if passiveMode is not a boolean', async () => {
 
-        server.register({
+        await expect(server.register({
             register: require('../'),
             options: {
                 validVersions: [1, 2],
@@ -213,34 +178,24 @@ describe('Plugin registration', () => {
                 vendorName: 33,
                 passiveMode: []
             }
-        }, (err) => {
-
-            if (err) {
-                done();
-            }
-        });
+        })).to.reject(Error, /Invalid plugin options/);
     });
 
-    it('should succeed if all required options are provided correctly', (done) => {
+    it('should succeed if all required options are provided correctly', async () => {
 
-        server.register({
+        await expect(server.register({
             register: require('../'),
             options: {
                 validVersions: [1, 2],
                 defaultVersion: 1,
                 vendorName: 'mysuperapi'
             }
-        }, (err) => {
-
-            if (!err) {
-                done();
-            }
-        });
+        })).to.reject(Error, /Invalid plugin options/);
     });
 
-    it('should succeed if all options are provided correctly', (done) => {
+    it('should succeed if all options are provided correctly', async () => {
 
-        server.register({
+        await expect(server.register({
             register: require('../'),
             options: {
                 validVersions: [1, 2],
@@ -249,380 +204,306 @@ describe('Plugin registration', () => {
                 versionHeader: 'myversion',
                 passiveMode: true
             }
-        }, (err) => {
-
-            if (!err) {
-                done();
-            }
-        });
+        })).to.reject(Error, /Invalid plugin options/);
     });
 });
 
 describe('Versioning', () => {
 
-    beforeEach((done) => {
+    beforeEach(async () => {
 
-        server.register([{
-            register: require('../'),
+        await server.register({
+            plugin: require('../'),
             options: {
                 validVersions: [0, 1, 2],
                 defaultVersion: 1,
                 vendorName: 'mysuperapi'
             }
-        }], (err) => {
-
-            if (err) {
-                return console.error('Can not register plugins', err);
-            }
         });
-
-        done();
     });
 
     describe(' -> basic versioning', () => {
 
-        beforeEach((done) => {
+        beforeEach(() => {
 
             server.route({
                 method: 'GET',
                 path: '/unversioned',
-                handler: function (request, reply) {
+                handler: function (request, h) {
 
                     const response = {
                         version: request.pre.apiVersion,
                         data: 'unversioned'
                     };
 
-                    return reply(response);
+                    return response;
                 }
             });
 
             server.route({
                 method: 'GET',
                 path: '/v0/versioned',
-                handler: function (request, reply) {
+                handler: function (request, h) {
 
                     const response = {
                         version: 0,
                         data: 'versioned'
                     };
 
-                    return reply(response);
+                    return response;
                 }
             });
 
             server.route({
                 method: 'GET',
                 path: '/v1/versioned',
-                handler: function (request, reply) {
+                handler: function (request, h) {
 
                     const response = {
                         version: 1,
                         data: 'versioned'
                     };
 
-                    return reply(response);
+                    return response;
                 }
             });
 
             server.route({
                 method: 'GET',
                 path: '/v2/versioned',
-                handler: function (request, reply) {
+                handler: function (request, h) {
 
                     const response = {
                         version: 2,
                         data: 'versioned'
                     };
 
-                    return reply(response);
+                    return response;
                 }
             });
-
-            done();
         });
 
-        it('returns version 2 if custom header is valid', (done) => {
+        it('returns version 2 if custom header is valid', async () => {
 
-            server.inject({
+            const response = await server.inject({
                 method: 'GET',
                 url: '/versioned',
                 headers: {
                     'api-version': '2'
                 }
-            }, (response) => {
-
-                expect(response.statusCode).to.equal(200);
-                expect(response.result.version).to.equal(2);
-                expect(response.result.data).to.equal('versioned');
-
-                done();
             });
+            expect(response.statusCode).to.equal(200);
+            expect(response.result.version).to.equal(2);
+            expect(response.result.data).to.equal('versioned');
         });
 
-        it('returns version 0 if custom header is valid', (done) => {
+        it('returns version 0 if custom header is valid', async () => {
 
-            server.inject({
+            const response = await server.inject({
                 method: 'GET',
                 url: '/versioned',
                 headers: {
                     'api-version': '0'
                 }
-            }, (response) => {
-
-                expect(response.statusCode).to.equal(200);
-                expect(response.result.version).to.equal(0);
-                expect(response.result.data).to.equal('versioned');
-
-                done();
             });
+            expect(response.statusCode).to.equal(200);
+            expect(response.result.version).to.equal(0);
+            expect(response.result.data).to.equal('versioned');
         });
 
-        it('returns version 2 if accept header is valid', (done) => {
+        it('returns version 2 if accept header is valid', async () => {
 
-            server.inject({
+            const response = await server.inject({
                 method: 'GET',
                 url: '/versioned',
                 headers: {
                     'Accept': 'application/vnd.mysuperapi.v2+json'
                 }
-            }, (response) => {
-
-                expect(response.statusCode).to.equal(200);
-                expect(response.result.version).to.equal(2);
-                expect(response.result.data).to.equal('versioned');
-
-                done();
             });
+            expect(response.statusCode).to.equal(200);
+            expect(response.result.version).to.equal(2);
+            expect(response.result.data).to.equal('versioned');
         });
 
-        it('returns default version if no header is sent', (done) => {
+        it('returns default version if no header is sent', async () => {
 
-            server.inject({
+            const response = await server.inject({
                 method: 'GET',
                 url: '/versioned'
-            }, (response) => {
-
-                expect(response.statusCode).to.equal(200);
-                expect(response.result.version).to.equal(1);
-                expect(response.result.data).to.equal('versioned');
-
-                done();
             });
+            expect(response.statusCode).to.equal(200);
+            expect(response.result.version).to.equal(1);
+            expect(response.result.data).to.equal('versioned');
         });
 
-        it('returns default version response header if no request header is sent', (done) => {
+        it('returns default version response header if no request header is sent', async () => {
 
-            server.inject({
+            const response = await server.inject({
                 method: 'GET',
                 url: '/versioned'
-            }, (response) => {
-
-                expect(response.statusCode).to.equal(200);
-                expect(response.result.version).to.equal(1);
-                expect(response.result.data).to.equal('versioned');
-                expect(response.headers['api-version']).to.equal(1);
-
-                done();
             });
+            expect(response.statusCode).to.equal(200);
+            expect(response.result.version).to.equal(1);
+            expect(response.result.data).to.equal('versioned');
+            expect(response.headers['api-version']).to.equal(1);
         });
 
-        it('returns version response header if response header is present', (done) => {
+        it('returns version response header if response header is present', async () => {
 
-            server.inject({
+            const response = await server.inject({
                 method: 'GET',
                 url: '/versioned',
                 headers: {
                     'api-version': '2'
                 }
-            }, (response) => {
-
-                expect(response.statusCode).to.equal(200);
-                expect(response.result.version).to.equal(2);
-                expect(response.result.data).to.equal('versioned');
-                expect(response.headers['api-version']).to.equal(2);
-
-                done();
             });
+            expect(response.statusCode).to.equal(200);
+            expect(response.result.version).to.equal(2);
+            expect(response.result.data).to.equal('versioned');
+            expect(response.headers['api-version']).to.equal(2);
         });
 
-        it('returns default version if custom header is invalid', (done) => {
+        it('returns default version if custom header is invalid', async () => {
 
-            server.inject({
+            const response = await server.inject({
                 method: 'GET',
                 url: '/versioned',
                 headers: {
                     'api-version': 'asdf'
                 }
-            }, (response) => {
-
-                expect(response.statusCode).to.equal(200);
-                expect(response.result.version).to.equal(1);
-                expect(response.result.data).to.equal('versioned');
-
-                done();
             });
+            expect(response.statusCode).to.equal(200);
+            expect(response.result.version).to.equal(1);
+            expect(response.result.data).to.equal('versioned');
         });
 
-        it('returns default version if custom header is null', (done) => {
+        it('returns default version if custom header is null', async () => {
 
-            server.inject({
+            const response = await server.inject({
                 method: 'GET',
                 url: '/versioned',
                 headers: {
                     'api-version': null
                 }
-            }, (response) => {
-
-                expect(response.statusCode).to.equal(200);
-                expect(response.result.version).to.equal(1);
-                expect(response.result.data).to.equal('versioned');
-
-                done();
             });
+            expect(response.statusCode).to.equal(200);
+            expect(response.result.version).to.equal(1);
+            expect(response.result.data).to.equal('versioned');
         });
 
-        it('returns default version if accept header is invalid', (done) => {
+        it('returns default version if accept header is invalid', async () => {
 
-            server.inject({
+            const response = await server.inject({
                 method: 'GET',
                 url: '/versioned',
                 headers: {
                     'Accept': 'application/someinvalidapi.vasf+json'
                 }
-            }, (response) => {
-
-                expect(response.statusCode).to.equal(200);
-                expect(response.result.version).to.equal(1);
-                expect(response.result.data).to.equal('versioned');
-
-                done();
             });
+            expect(response.statusCode).to.equal(200);
+            expect(response.result.version).to.equal(1);
+            expect(response.result.data).to.equal('versioned');
         });
 
-        it('returns default version if accept header has an invalid vendor-name', (done) => {
+        it('returns default version if accept header has an invalid vendor-name', async () => {
 
-            server.inject({
+            const response = await server.inject({
                 method: 'GET',
                 url: '/versioned',
                 headers: {
                     'Accept': 'application/vnd.someinvalidapi.v2+json'
                 }
-            }, (response) => {
-
-                expect(response.statusCode).to.equal(200);
-                expect(response.result.version).to.equal(1);
-                expect(response.result.data).to.equal('versioned');
-
-                done();
             });
+            expect(response.statusCode).to.equal(200);
+            expect(response.result.version).to.equal(1);
+            expect(response.result.data).to.equal('versioned');
         });
 
-        it('returns a 400 if invalid api version is requested (not included in validVersions)', (done) => {
+        it('returns a 400 if invalid api version is requested (not included in validVersions)', async () => {
 
-            server.inject({
+            const response = await server.inject({
                 method: 'GET',
                 url: '/versioned',
                 headers: {
                     'api-version': '3'
                 }
-            }, (response) => {
-
-                expect(response.statusCode).to.equal(400);
-
-                done();
             });
+            expect(response.statusCode).to.equal(400);
         });
 
-        it('returns the same response for an unversioned route no matter what version is requested - version 1', (done) => {
+        it('returns the same response for an unversioned route no matter what version is requested - version 1', async () => {
 
-            server.inject({
+            const response = await server.inject({
                 method: 'GET',
                 url: '/unversioned',
                 headers: {
                     'api-version': '1'
                 }
-            }, (response) => {
-
-                expect(response.statusCode).to.equal(200);
-                expect(response.result.version).to.equal(1);
-                expect(response.result.data).to.equal('unversioned');
-
-                done();
             });
+            expect(response.statusCode).to.equal(200);
+            expect(response.result.version).to.equal(1);
+            expect(response.result.data).to.equal('unversioned');
         });
 
-        it('returns the same response for an unversioned route no matter what version is requested - version 2', (done) => {
+        it('returns the same response for an unversioned route no matter what version is requested - version 2', async () => {
 
-            server.inject({
+            const response = await server.inject({
                 method: 'GET',
                 url: '/unversioned',
                 headers: {
                     'api-version': '2'
                 }
-            }, (response) => {
-
-                expect(response.statusCode).to.equal(200);
-                expect(response.result.version).to.equal(2);
-                expect(response.result.data).to.equal('unversioned');
-
-                done();
             });
+            expect(response.statusCode).to.equal(200);
+            expect(response.result.version).to.equal(2);
+            expect(response.result.data).to.equal('unversioned');
         });
 
-        it('returns the same response for an unversioned route no matter what version is requested - no version (=default)', (done) => {
+        it('returns the same response for an unversioned route no matter what version is requested - no version (=default)', async () => {
 
-            server.inject({
+            const response = await server.inject({
                 method: 'GET',
                 url: '/unversioned'
-            }, (response) => {
-
-                expect(response.statusCode).to.equal(200);
-                expect(response.result.version).to.equal(1);
-                expect(response.result.data).to.equal('unversioned');
-
-                done();
             });
+            expect(response.statusCode).to.equal(200);
+            expect(response.result.version).to.equal(1);
+            expect(response.result.data).to.equal('unversioned');
         });
     });
 
-    it('preserves query parameters after url-rewrite', (done) => {
+    it('preserves query parameters after url-rewrite', async () => {
 
         server.route({
             method: 'GET',
             path: '/v1/versionedWithParams',
-            handler: function (request, reply) {
+            handler: function (request, h) {
 
                 const response = {
                     params: request.query
                 };
 
-                return reply(response);
+                return response;
             }
         });
 
-        server.inject({
+        const response = await server.inject({
             method: 'GET',
             url: '/versionedWithParams?test=1'
-        }, (response) => {
-
-            expect(response.statusCode).to.equal(200);
-            expect(response.result.params).to.equal({
-                test: '1'
-            });
-
-            done();
+        });
+        expect(response.statusCode).to.equal(200);
+        expect(response.result.params).to.equal({
+            test: '1'
         });
     });
 
-    it('should work with CORS enabled', (done) => {
+    it('should work with CORS enabled', async () => {
 
         server.route({
             method: 'GET',
             path: '/corstest',
-            handler: function (request, reply) {
+            handler: function (request, h) {
 
-                return reply('Testing CORS!');
+                return 'Testing CORS!';
             },
             config: {
                 cors: {
@@ -632,7 +513,7 @@ describe('Versioning', () => {
             }
         });
 
-        server.inject({
+        const response = await server.inject({
             method: 'OPTIONS',
             url: '/corstest',
             headers: {
@@ -640,299 +521,264 @@ describe('Versioning', () => {
                 'Access-Control-Request-Method': 'GET',
                 'Access-Control-Request-Headers': 'accept, authorization'
             }
-        }, (response) => {
+        });
+        expect(response.statusCode).to.equal(200);
+        expect(response.headers).to.include({
+            'access-control-allow-origin': 'http://www.example.com'
+        });
 
-            expect(response.statusCode).to.equal(200);
-            expect(response.headers).to.include({
-                'access-control-allow-origin': 'http://www.example.com'
-            });
+        expect(response.headers).to.include('access-control-allow-methods');
+        expect(response.headers['access-control-allow-methods'].split(',')).to.include('GET');
 
-            expect(response.headers).to.include('access-control-allow-methods');
-            expect(response.headers['access-control-allow-methods'].split(',')).to.include('GET');
+        expect(response.headers).to.include('access-control-allow-headers');
+        expect(response.headers['access-control-allow-headers'].split(',')).to.include(['Accept', 'Authorization']);
+    });
+});
 
-            expect(response.headers).to.include('access-control-allow-headers');
-            expect(response.headers['access-control-allow-headers'].split(',')).to.include(['Accept', 'Authorization']);
+describe(' -> path parameters', () => {
 
-            done();
+    beforeEach(async () => {
+
+        await server.register({
+            plugin: require('../'),
+            options: {
+                validVersions: [0, 1, 2],
+                defaultVersion: 1,
+                vendorName: 'mysuperapi'
+            }
+        });
+        server.route({
+            method: 'GET',
+            path: '/unversioned/{catchAll*}',
+            handler: function (request, h) {
+
+                const response = {
+                    version: request.pre.apiVersion,
+                    data: 'unversionedCatchAll'
+                };
+
+                return response;
+            }
+        });
+
+        server.route({
+            method: 'GET',
+            path: '/v2/versioned/{catchAll*3}',
+            handler: function (request, h) {
+
+                const response = {
+                    version: request.pre.apiVersion,
+                    data: 'versionedCatchAll'
+                };
+
+                return response;
+            }
+        });
+
+
+        server.route({
+            method: 'GET',
+            path: '/unversioned/withPathParam/{unversionedPathParam}',
+            handler: function (request, h) {
+
+                const response = {
+                    version: request.pre.apiVersion,
+                    data: request.params.unversionedPathParam
+                };
+
+                return response;
+            }
+        });
+
+        server.route({
+            method: 'GET',
+            path: '/v1/versioned/withPathParam/{versionedPathParam}',
+            handler: function (request, h) {
+
+                const response = {
+                    version: request.pre.apiVersion,
+                    data: request.params.versionedPathParam
+                };
+
+                return response;
+            }
+        });
+
+        server.route({
+            method: 'GET',
+            path: '/v2/versioned/multiSegment/{segment*2}',
+            handler: function (request, h) {
+
+                const response = {
+                    version: request.pre.apiVersion,
+                    data: request.params.segment
+                };
+
+                return response;
+            }
+        });
+
+        server.route({
+            method: 'GET',
+            path: '/v2/versioned/optionalPathParam/{optional?}',
+            handler: function (request, h) {
+
+                const response = {
+                    version: request.pre.apiVersion,
+                    data: request.params.optional
+                };
+
+                return response;
+            }
         });
     });
 
-    describe(' -> path parameters', () => {
+    it('resolves unversioned catch all routes', async () => {
 
-        beforeEach((done) => {
-
-            server.route({
-                method: 'GET',
-                path: '/unversioned/{catchAll*}',
-                handler: function (request, reply) {
-
-                    const response = {
-                        version: request.pre.apiVersion,
-                        data: 'unversionedCatchAll'
-                    };
-
-                    return reply(response);
-                }
-            });
-
-            server.route({
-                method: 'GET',
-                path: '/v2/versioned/{catchAll*}',
-                handler: function (request, reply) {
-
-                    const response = {
-                        version: request.pre.apiVersion,
-                        data: 'versionedCatchAll'
-                    };
-
-                    return reply(response);
-                }
-            });
-
-            server.route({
-                method: 'GET',
-                path: '/unversioned/withPathParam/{unversionedPathParam}',
-                handler: function (request, reply) {
-
-                    const response = {
-                        version: request.pre.apiVersion,
-                        data: request.params.unversionedPathParam
-                    };
-
-                    return reply(response);
-                }
-            });
-
-            server.route({
-                method: 'GET',
-                path: '/v1/versioned/withPathParam/{versionedPathParam}',
-                handler: function (request, reply) {
-
-                    const response = {
-                        version: request.pre.apiVersion,
-                        data: request.params.versionedPathParam
-                    };
-
-                    return reply(response);
-                }
-            });
-
-            server.route({
-                method: 'GET',
-                path: '/v2/versioned/multiSegment/{segment*2}',
-                handler: function (request, reply) {
-
-                    const response = {
-                        version: request.pre.apiVersion,
-                        data: request.params.segment
-                    };
-
-                    return reply(response);
-                }
-            });
-
-            server.route({
-                method: 'GET',
-                path: '/v2/versioned/optionalPathParam/{optional?}',
-                handler: function (request, reply) {
-
-                    const response = {
-                        version: request.pre.apiVersion,
-                        data: request.params.optional
-                    };
-
-                    return reply(response);
-                }
-            });
-
-            done();
+        const response = await server.inject({
+            method: 'GET',
+            url: '/unversioned/catch/all/route'
         });
+        expect(response.statusCode).to.equal(200);
+        expect(response.result.version).to.equal(1);
+        expect(response.result.data).to.equal('unversionedCatchAll');
+    });
 
-        it('resolves unversioned catch all routes', (done) => {
+    it('resolves versioned catch all routes', async () => {
 
-            server.inject({
-                method: 'GET',
-                url: '/unversioned/catch/all/route'
-            }, (response) => {
+        const apiVersion = 2;
 
-                expect(response.statusCode).to.equal(200);
-                expect(response.result.version).to.equal(1);
-                expect(response.result.data).to.equal('unversionedCatchAll');
-
-                done();
-            });
+        const response = await server.inject({
+            method: 'GET',
+            url: '/versioned/catch/all/route',
+            headers: {
+                'api-version': apiVersion
+            }
         });
+        expect(response.statusCode).to.equal(200);
+        expect(response.result.version).to.equal(apiVersion);
+        expect(response.result.data).to.equal('versionedCatchAll');
+    });
 
-        it('resolves versioned catch all routes', (done) => {
+    it('resolves unversioned routes with path parameters', async () => {
 
-            const apiVersion = 2;
+        const pathParam = '123456789';
 
-            server.inject({
-                method: 'GET',
-                url: '/versioned/catch/all/route',
-                headers: {
-                    'api-version': apiVersion
-                }
-            }, (response) => {
-
-                expect(response.statusCode).to.equal(200);
-                expect(response.result.version).to.equal(apiVersion);
-                expect(response.result.data).to.equal('versionedCatchAll');
-
-                done();
-            });
+        const response = await server.inject({
+            method: 'GET',
+            url: '/unversioned/withPathParam/' + pathParam
         });
+        expect(response.statusCode).to.equal(200);
+        expect(response.result.version).to.equal(1);
+        expect(response.result.data).to.equal(pathParam);
+    });
 
-        it('resolves unversioned routes with path parameters', (done) => {
+    it('resolves versioned routes with path parameters', async () => {
 
-            const pathParam = '123456789';
+        const pathParam = '123456789';
+        const apiVersion = 1;
 
-            server.inject({
-                method: 'GET',
-                url: '/unversioned/withPathParam/' + pathParam
-            }, (response) => {
-
-                expect(response.statusCode).to.equal(200);
-                expect(response.result.version).to.equal(1);
-                expect(response.result.data).to.equal(pathParam);
-
-                done();
-            });
+        const response = await server.inject({
+            method: 'GET',
+            url: '/versioned/withPathParam/' + pathParam,
+            headers: {
+                'api-version': apiVersion
+            }
         });
+        expect(response.statusCode).to.equal(200);
+        expect(response.result.version).to.equal(apiVersion);
+        expect(response.result.data).to.equal(pathParam);
+    });
 
-        it('resolves versioned routes with path parameters', (done) => {
+    it('resolves multi segment path parameters', async () => {
 
-            const pathParam = '123456789';
-            const apiVersion = 1;
+        const apiVersion = 2;
+        const pathParam = 'multi/segment';
 
-            server.inject({
-                method: 'GET',
-                url: '/versioned/withPathParam/' + pathParam,
-                headers: {
-                    'api-version': apiVersion
-                }
-            }, (response) => {
-
-                expect(response.statusCode).to.equal(200);
-                expect(response.result.version).to.equal(apiVersion);
-                expect(response.result.data).to.equal(pathParam);
-
-                done();
-            });
+        const response = await server.inject({
+            method: 'GET',
+            url: '/versioned/multiSegment/' + pathParam,
+            headers: {
+                'api-version': apiVersion
+            }
         });
+        expect(response.statusCode).to.equal(200);
+        expect(response.result.version).to.equal(apiVersion);
+        expect(response.result.data).to.equal(pathParam);
+    });
 
-        it('resolves multi segment path parameters', (done) => {
+    it('resolves optional path parameters - without optional value', async () => {
 
-            const apiVersion = 2;
-            const pathParam = 'multi/segment';
+        const apiVersion = 2;
+        const pathParam = (server.version.indexOf('17.') > -1 ? '' : undefined);
 
-            server.inject({
-                method: 'GET',
-                url: '/versioned/multiSegment/' + pathParam,
-                headers: {
-                    'api-version': apiVersion
-                }
-            }, (response) => {
-
-                expect(response.statusCode).to.equal(200);
-                expect(response.result.version).to.equal(apiVersion);
-                expect(response.result.data).to.equal(pathParam);
-
-                done();
-            });
+        const response = await server.inject({
+            method: 'GET',
+            url: '/versioned/optionalPathParam/',
+            headers: {
+                'api-version': apiVersion
+            }
         });
+        expect(response.statusCode).to.equal(200);
+        expect(response.result.version).to.equal(apiVersion);
+        expect(response.result.data).to.equal(pathParam);
+    });
 
-        it('resolves optional path parameters - without optional value', (done) => {
+    it('resolves optional path parameters - with optional value', async () => {
 
-            const apiVersion = 2;
-            const pathParam = (server.version.indexOf('16.') > -1 ? '' : undefined);
+        const apiVersion = 2;
+        const pathParam = 'test';
 
-            server.inject({
-                method: 'GET',
-                url: '/versioned/optionalPathParam/',
-                headers: {
-                    'api-version': apiVersion
-                }
-            }, (response) => {
-
-                expect(response.statusCode).to.equal(200);
-                expect(response.result.version).to.equal(apiVersion);
-                expect(response.result.data).to.equal(pathParam);
-
-                done();
-            });
+        const response = await server.inject({
+            method: 'GET',
+            url: '/versioned/optionalPathParam/' + pathParam,
+            headers: {
+                'api-version': apiVersion
+            }
         });
-
-        it('resolves optional path parameters - with optional value', (done) => {
-
-            const apiVersion = 2;
-            const pathParam = 'test';
-
-            server.inject({
-                method: 'GET',
-                url: '/versioned/optionalPathParam/' + pathParam,
-                headers: {
-                    'api-version': apiVersion
-                }
-            }, (response) => {
-
-                expect(response.statusCode).to.equal(200);
-                expect(response.result.version).to.equal(apiVersion);
-                expect(response.result.data).to.equal(pathParam);
-
-                done();
-            });
-        });
+        expect(response.statusCode).to.equal(200);
+        expect(response.result.version).to.equal(apiVersion);
+        expect(response.result.data).to.equal(pathParam);
     });
 });
 
 describe('Versioning with passive mode', () => {
 
-    beforeEach((done) => {
+    beforeEach(async () => {
 
-        server.register([{
-            register: require('../'),
+        await server.register({
+            plugin: require('../'),
             options: {
                 validVersions: [1, 2],
                 defaultVersion: 1,
                 vendorName: 'mysuperapi',
                 passiveMode: true
             }
-        }], (err) => {
-
-            if (err) {
-                return console.error('Can not register plugins', err);
-            }
         });
 
         server.route({
             method: 'GET',
             path: '/unversioned',
-            handler: function (request, reply) {
+            handler: function (request, h) {
 
                 const response = {
                     data: 'unversioned'
                 };
 
-                return reply(response);
+                return response;
             }
         });
-
-        done();
     });
 
-    it('returns no version if no header is supplied', (done) => {
+    it('returns no version if no header is supplied', async () => {
 
-        server.inject({
+        const response = await server.inject({
             method: 'GET',
             url: '/unversioned'
-        }, (response) => {
-
-            expect(response.statusCode).to.equal(200);
-            expect(response.result.version).to.equal(undefined);
-            expect(response.result.data).to.equal('unversioned');
-
-            done();
         });
+        expect(response.statusCode).to.equal(200);
+        expect(response.result.version).to.equal(undefined);
+        expect(response.result.data).to.equal('unversioned');
     });
 });
+
