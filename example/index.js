@@ -8,7 +8,7 @@ const init = async function () {
     try {
         const server = new Hapi.server({ port: 3000 });
         await server.register({
-            register: require('hapi-api-version'),
+            plugin: require('hapi-api-version'),
             options: {
                 validVersions: [1, 2],
                 defaultVersion: 2,
@@ -19,12 +19,12 @@ const init = async function () {
         server.route({
             method: 'GET',
             path: '/version',
-            handler: function (request, reply) {
+            handler: function (request, h) {
 
                 // Return the api-version which was requested
-                return reply({
+                return {
                     version: request.pre.apiVersion
-                });
+                };
             }
         });
 
@@ -42,9 +42,9 @@ const init = async function () {
         server.route({
             method: 'GET',
             path: '/v1/users',
-            handler: function (request, reply) {
+            handler: function (request, h) {
 
-                return reply(usersVersion1);
+                return usersVersion1;
             },
             config: {
                 response: {
@@ -60,9 +60,9 @@ const init = async function () {
         server.route({
             method: 'GET',
             path: '/v2/users',
-            handler: function (request, reply) {
+            handler: function (request, h) {
 
-                return reply(usersVersion2);
+                return usersVersion2;
             },
             config: {
                 response: {
@@ -84,15 +84,15 @@ const init = async function () {
         server.route({
             method: 'GET',
             path: '/users/simple',
-            handler: function (request, reply) {
+            handler: function (request, h) {
 
                 const version = request.pre.apiVersion;
 
                 if (version === 1) {
-                    return reply(usersVersion1);
+                    return usersVersion1;
                 }
 
-                return reply(usersVersion2);
+                return usersVersion2;
             }
         });
         // Start the server
