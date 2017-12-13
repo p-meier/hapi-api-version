@@ -1,6 +1,6 @@
 {
   "name": "hapi-api-version",
-  "version": "1.4.0",
+  "version": "2.0.0",
   "description": "An API versioning plugin for hapi.",
   "main": "index.js",
   "scripts": {
@@ -20,15 +20,15 @@
   "author": "Patrick Meier",
   "license": "Apache-2.0",
   "engines": {
-    "node": ">=4.0.0"
+    "node": ">=8.0.0"
   },
   "peerDependencies": {
-    "hapi": ">=10.x.x"
+    "hapi": ">=17.x.x"
   },
   "devDependencies": {
-    "code": "^4.1.0",
-    "hapi": "^16.5.2",
-    "lab": "^14.2.0"
+    "hapi": "17.x.x",
+    "code": "5.x.x",
+    "lab": "15.x.x"
   },
   "dependencies": {
     "boom": "^5.2.0",

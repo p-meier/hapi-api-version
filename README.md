@@ -4,7 +4,7 @@ __Lead Maintainer: [Tim Costa](https://github.com/timcosta)__
 
 [![Build Status](https://travis-ci.org/p-meier/hapi-api-version.svg?branch=master)](https://travis-ci.org/p-meier/hapi-api-version)
 
-An API versioning plugin for [hapi](http://hapijs.com/).
+An API versioning plugin for [hapi](http://hapijs.com/) v17 onwards.
 
 ## Features / Goals
 
@@ -16,7 +16,7 @@ An API versioning plugin for [hapi](http://hapijs.com/).
 
 ## Requirements
 
-Runs with Node >=4 and hapi >=10 which is tested with Travis CI.
+Runs with Node >=8 and hapi >=17 which is tested with Travis CI.
 
 ## Installation
 
@@ -33,26 +33,26 @@ Register it with the server:
 
 const Hapi = require('hapi');
 
-const server = new Hapi.Server();
-server.connection({
-    port: 3000
-});
-
-server.register({
-    register: require('hapi-api-version'),
-    options: {
-        validVersions: [1, 2],
-        defaultVersion: 2,
-        vendorName: 'mysuperapi'
-    }
-}, (err) => {
-
-    //Add routes here...
-
-    server.start((err) => {
+const init = async function () {
+    try {
+        const server = new Hapi.server({ port: 3000 });
+        await server.register({
+            register: require('hapi-api-version'),
+            options: {
+                validVersions: [1, 2],
+                defaultVersion: 2,
+                vendorName: 'mysuperapi'
+            }
+        })
+        await server.start();
         console.log('Server running at:', server.info.uri);
-    });
-});
+    }   
+    catch (err) {
+        console.error(err);
+        process.exit(1);
+    }
+}
+init();
 
 ```
 
@@ -68,13 +68,13 @@ This is the type of routes which never change regardless of the api version. The
 server.route({
     method: 'GET',
     path:'/loginStatus',
-    handler: function (request, reply) {
+    handler: function (request, h) {
 
         const loggedIn = ...;
 
-        return reply({
+        return {
           loggedIn: loggedIn
-        });
+        );
     }
 });
 ```
@@ -100,15 +100,15 @@ const usersVersion2 = [{
 server.route({
     method: 'GET',
     path: '/users',
-    handler: function (request, reply) {
+    handler: function (request, h) {
 
         const version = request.pre.apiVersion;
 
         if (version === 1) {
-            return reply(usersVersion1);
+            return usersVersion1;
         }
 
-        return reply(usersVersion2);
+        return usersVersion2;
     }
 });
 ```
@@ -130,9 +130,9 @@ const usersVersion2 = [{
 server.route({
     method: 'GET',
     path: '/v1/users',
-    handler: function (request, reply) {
+    handler: function (request, h) {
 
-        return reply(usersVersion1);
+        return usersVersion1;
     },
     config: {
         response: {
@@ -148,9 +148,9 @@ server.route({
 server.route({
     method: 'GET',
     path: '/v2/users',
-    handler: function (request, reply) {
+    handler: function (request, h) {
 
-        return reply(usersVersion2);
+        return usersVersion2;
     },
     config: {
         response: {

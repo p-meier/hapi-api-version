@@ -49,7 +49,7 @@ const _extractVersionFromAcceptHeader = function (request, options) {
 };
 
 //Set a response header containing the version number
-const _addVersionToResponseHeader = function (request, reply, requestedVersion, options) {
+const _addVersionToResponseHeader = function (request, requestedVersion, options) {
 
     const headerName = options.versionHeader;
     const response = request.response;
@@ -60,21 +60,23 @@ const _addVersionToResponseHeader = function (request, reply, requestedVersion, 
     else {
         response.header(headerName, requestedVersion);
     }
-    reply.continue();
+    return;
 };
 
-exports.register = function (server, options, next) {
+exports.name = Package.name;
+exports.version = Package.version;
+
+exports.register = (server, options) => {
 
     const validateOptions = internals.optionsSchema.validate(options);
-
     if (validateOptions.error) {
-        return next(validateOptions.error);
+        throw new Error(validateOptions.error);
     }
 
     //Use the validated and maybe converted values from Joi
     options = validateOptions.value;
 
-    server.ext('onRequest', (request, reply) => {
+    server.ext('onRequest', (request, h) => {
 
         //First check for custom header
         let requestedVersion = _extractVersionFromCustomHeader(request, options);
@@ -86,12 +88,12 @@ exports.register = function (server, options, next) {
 
         //If passive mode skips the rest for non versioned routes
         if (options.passiveMode === true && typeof requestedVersion !== 'number') {
-            return reply.continue();
+            return h.continue;
         }
 
         //If there was a version by now check if it is valid
         if (typeof requestedVersion === 'number' && !Hoek.contain(options.validVersions, requestedVersion)) {
-            return reply(Boom.badRequest('Invalid api-version! Valid values: ' + options.validVersions.join()));
+            return Boom.badRequest('Invalid api-version! Valid values: ' + options.validVersions.join());
         }
 
         //If there was no version by now use the default version
@@ -112,18 +114,12 @@ exports.register = function (server, options, next) {
         //Set version for usage in handler
         request.pre.apiVersion = requestedVersion;
 
-        return reply.continue();
+        return h.continue;
     });
 
-    server.ext('onPreResponse', (request, reply) => {
+    server.ext('onPreResponse', (request, h) => {
 
-        _addVersionToResponseHeader(request, reply, request.pre.apiVersion, options);
+        _addVersionToResponseHeader(request, request.pre.apiVersion, options);
+        return h.continue;
     });
-
-    return next();
-};
-
-exports.register.attributes = {
-    name: Package.name,
-    version: Package.version
 };
