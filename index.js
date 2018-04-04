@@ -19,11 +19,10 @@ const internals = {
 };
 
 const _extractVersionFromPath = function (request, options) {
-    
-    const apiVersionSegment = request.path.split('/')[2]
+    const path = request.path
 
-    if ((/^v[0-9]+$/).test(apiVersionSegment)) {
-        return parseInt(apiVersionSegment[1])
+    if ((/(v[0-9]+)/).test(path)) {
+        return parseInt(path.match(/(v[0-9]+)/)[0].substr(1))
     }
 
     return null
