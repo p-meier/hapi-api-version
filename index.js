@@ -18,6 +18,16 @@ const internals = {
     })
 };
 
+const _extractVersionFromPath = function (request, options) {
+    const path = request.path
+
+    if ((/(v[0-9]+)/).test(path)) {
+        return parseInt(path.match(/(v[0-9]+)/)[0].substr(1))
+    }
+
+    return null
+}
+
 const _extractVersionFromCustomHeader = function (request, options) {
 
     const apiVersionHeader = request.headers[options.versionHeader];
@@ -84,6 +94,11 @@ exports.register = (server, options) => {
         //If no version check accept header
         if (typeof requestedVersion !== 'number') {
             requestedVersion = _extractVersionFromAcceptHeader(request, options);
+        }
+
+        //If no version check request path
+        if (typeof requestedVersion !== 'number') {
+            requestedVersion = _extractVersionFromPath(request, options)
         }
 
         //If passive mode skips the rest for non versioned routes
