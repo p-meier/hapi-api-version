@@ -535,6 +535,49 @@ describe('Versioning', () => {
     });
 });
 
+describe(' -> vendor name ', () => {
+
+    beforeEach(async () => {
+
+        await server.register({
+            plugin: require('../'),
+            options: {
+                validVersions: [0, 1, 2],
+                defaultVersion: 1,
+                vendorName: 'my.super-Api!'
+            }
+        });
+
+        server.route({
+            method: 'GET',
+            path: '/v2/versioned',
+            handler: function (request, h) {
+
+                const response = {
+                    version: 2,
+                    data: 'versioned'
+                };
+
+                return response;
+            }
+        });
+    });
+
+    it('should accept non-alphanumeric characters', async () => {
+
+        const response = await server.inject({
+            method: 'GET',
+            url: '/versioned',
+            headers: {
+                'Accept': 'application/vnd.my.super-Api!.v2+json'
+            }
+        });
+        expect(response.statusCode).to.equal(200);
+        expect(response.result.version).to.equal(2);
+        expect(response.result.data).to.equal('versioned');
+    });
+});
+
 describe(' -> path parameters', () => {
 
     beforeEach(async () => {
