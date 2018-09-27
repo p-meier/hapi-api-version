@@ -34,13 +34,16 @@ const _extractVersionFromAcceptHeader = function (request, options) {
     const acceptHeader = request.headers.accept;
     const media = MediaType.fromString(acceptHeader);
 
-    if (media.isValid() && (/^vnd.[a-zA-Z0-9]+\.v[0-9]+$/).test(media.subtype)) {
+    if (media.isValid() && (/^vnd.[a-z][a-z0-9.!#$&^_-]{0,126}\.v[0-9]+$/i).test(media.subtype)) {
 
-        if (media.subtypeFacets[1] !== options.vendorName) {
+        const vendorFacets = media.subtypeFacets.slice(1, media.subtypeFacets.length - 1);
+        const vendorName = vendorFacets.join('.');
+
+        if (vendorName !== options.vendorName) {
             return null;
         }
 
-        const version = media.subtypeFacets[2].replace('v', '');
+        const version = media.subtypeFacets[media.subtypeFacets.length - 1].slice(1);
 
         return parseInt(version);
     }
