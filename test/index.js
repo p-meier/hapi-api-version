@@ -537,7 +537,7 @@ describe('Versioning', () => {
 
 describe(' -> vendor name ', () => {
 
-    beforeEach(async () => {
+    it('should accept non-alphanumeric characters', async () => {
 
         await server.register({
             plugin: require('../'),
@@ -561,9 +561,6 @@ describe(' -> vendor name ', () => {
                 return response;
             }
         });
-    });
-
-    it('should accept non-alphanumeric characters', async () => {
 
         const response = await server.inject({
             method: 'GET',
@@ -574,6 +571,43 @@ describe(' -> vendor name ', () => {
         });
         expect(response.statusCode).to.equal(200);
         expect(response.result.version).to.equal(2);
+        expect(response.result.data).to.equal('versioned');
+    });
+
+    it('should accept several period characters', async () => {
+
+        await server.register({
+            plugin: require('../'),
+            options: {
+                validVersions: [0, 1, 10],
+                defaultVersion: 1,
+                vendorName: 'company.departmanet.project.api'
+            }
+        });
+
+        server.route({
+            method: 'GET',
+            path: '/v10/versioned',
+            handler: function (request, h) {
+
+                const response = {
+                    version: 10,
+                    data: 'versioned'
+                };
+
+                return response;
+            }
+        });
+
+        const response = await server.inject({
+            method: 'GET',
+            url: '/versioned',
+            headers: {
+                'Accept': 'application/vnd.company.departmanet.project.api.v10+json'
+            }
+        });
+        expect(response.statusCode).to.equal(200);
+        expect(response.result.version).to.equal(10);
         expect(response.result.data).to.equal('versioned');
     });
 });
