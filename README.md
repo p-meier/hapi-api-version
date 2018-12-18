@@ -74,7 +74,7 @@ server.route({
 
         return {
           loggedIn: loggedIn
-        );
+        };
     }
 });
 ```
