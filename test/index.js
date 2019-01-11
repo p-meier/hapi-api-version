@@ -533,6 +533,43 @@ describe('Versioning', () => {
         expect(response.headers).to.include('access-control-allow-headers');
         expect(response.headers['access-control-allow-headers'].split(',')).to.include(['Accept', 'Authorization']);
     });
+
+    it('should 400 when an OPTIONS request has a malformed access-control-request-method header', async () => {
+
+        server.route({
+            method: 'GET',
+            path: '/corstest',
+            handler: function (request, h) {
+
+                return 'Testing CORS!';
+            },
+            config: {
+                cors: {
+                    origin: ['*'],
+                    headers: ['Accept', 'Authorization']
+                }
+            }
+        });
+
+        const response = await server.inject({
+            method: 'OPTIONS',
+            url: '/corstest',
+            headers: {
+                'Origin': 'http://www.example.com',
+                'Access-Control-Request-Method': ''
+            }
+        });
+        expect(response.statusCode).to.equal(400);
+    });
+
+    it('handles invalid request methods properly', async () => {
+
+        const response = await server.inject({
+            method: 'FAKE',
+            url: '/route'
+        });
+        expect(response.statusCode).to.equal(404);
+    });
 });
 
 describe(' -> vendor name ', () => {
