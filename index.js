@@ -106,7 +106,14 @@ exports.register = (server, options) => {
 
         const versionedPath = options.basePath + 'v' + requestedVersion + request.path.slice(options.basePath.length - 1);
 
-        const method = request.method === 'options' ? request.headers['access-control-request-method'] : request.method;
+        let method = request.method;
+        if (request.method === 'options') {
+            method = request.headers['access-control-request-method'];
+            if (!method) {
+                throw Boom.badRequest('The Access-Control-Request-Method header must be set for CORS requests.');
+            }
+        }
+
 
         const route = server.match(method, versionedPath);
 
