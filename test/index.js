@@ -561,6 +561,15 @@ describe('Versioning', () => {
         });
         expect(response.statusCode).to.equal(400);
     });
+
+    it('handles invalid request methods properly', async () => {
+
+        const response = await server.inject({
+            method: 'FAKE',
+            url: '/route'
+        });
+        expect(response.statusCode).to.equal(404);
+    });
 });
 
 describe(' -> vendor name ', () => {
