@@ -103,8 +103,8 @@ exports.register = (server, options) => {
         if (typeof requestedVersion !== 'number') {
             requestedVersion = options.defaultVersion;
         }
-
-        const versionedPath = options.basePath + 'v' + requestedVersion + request.path.slice(options.basePath.length - 1);
+        const baseVersionedPath = options.basePath + 'v' + requestedVersion;
+        const versionedPath = baseVersionedPath + (request.path === '/' ? '' : request.path.slice(options.basePath.length - 1));
 
         let method = request.method;
         if (request.method === 'options') {
@@ -117,8 +117,9 @@ exports.register = (server, options) => {
 
         const route = server.match(method, versionedPath);
 
-        if (route && route.path.indexOf(options.basePath + 'v' + requestedVersion + '/') === 0) {
-            request.setUrl(options.basePath + 'v' + requestedVersion + request.url.path.slice(options.basePath.length - 1)); //required to preserve query parameters
+        if (route && route.path.indexOf(baseVersionedPath) === 0) {
+            const url = versionedPath + (request.url.search ? request.url.search : '');
+            request.setUrl(url); //required to preserve query parameters
         }
 
         //Set version for usage in handler

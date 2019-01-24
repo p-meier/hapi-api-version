@@ -570,6 +570,47 @@ describe('Versioning', () => {
         });
         expect(response.statusCode).to.equal(404);
     });
+
+    it('handles rootPath and endpoint as "/" when using stripTrailingSlash', async () => {
+
+        const newServer = Hapi.server( { router: { stripTrailingSlash: true } } );
+        await newServer.start();
+
+        await newServer.register({
+            plugin: require('../'),
+            options: {
+                validVersions: [0, 1, 2],
+                defaultVersion: 1,
+                vendorName: 'mysuperapi'
+            }
+        });
+
+        newServer.route({
+            method: 'POST',
+            path: '/v2',
+            handler: function (request, h) {
+
+                const response = {
+                    version: 2,
+                    data: 'versioned'
+                };
+
+                return response;
+            }
+        });
+
+
+        const response = await newServer.inject( {
+            method: 'POST',
+            url: '/',
+            headers: {
+                'api-version': '2'
+            }
+        });
+        expect(response.statusCode).to.equal(200);
+        expect(response.result.version).to.equal(2);
+        expect(response.result.data).to.equal('versioned');
+    });
 });
 
 describe(' -> vendor name ', () => {
