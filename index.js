@@ -80,7 +80,6 @@ exports.register = (server, options) => {
     options = validateOptions.value;
 
     server.ext('onRequest', (request, h) => {
-
         //First check for custom header
         let requestedVersion = _extractVersionFromCustomHeader(request, options);
 
@@ -103,8 +102,15 @@ exports.register = (server, options) => {
         if (typeof requestedVersion !== 'number') {
             requestedVersion = options.defaultVersion;
         }
+
         const baseVersionedPath = options.basePath + 'v' + requestedVersion;
-        const versionedPath = baseVersionedPath + (request.path === '/' ? '' : request.path.slice(options.basePath.length - 1));
+
+        const stripTrailingSlash = server.settings.router.stripTrailingSlash;
+        let versionedPath = baseVersionedPath + request.path.slice(options.basePath.length - 1);
+
+        if ( stripTrailingSlash === true) {
+            versionedPath = baseVersionedPath + (request.path === '/' ? '' : request.path.slice(options.basePath.length - 1));
+        }
 
         let method = request.method;
         if (request.method === 'options') {
@@ -113,7 +119,6 @@ exports.register = (server, options) => {
                 throw Boom.badRequest('The Access-Control-Request-Method header must be set for CORS requests.');
             }
         }
-
 
         const route = server.match(method, versionedPath);
 
