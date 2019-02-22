@@ -260,7 +260,7 @@ describe('Versioning', () => {
                 handler: function (request, h) {
 
                     const response = {
-                        version: 1,
+                        version: request.pre.apiVersion,
                         data: 'versioned'
                     };
 
@@ -274,7 +274,7 @@ describe('Versioning', () => {
                 handler: function (request, h) {
 
                     const response = {
-                        version: 2,
+                        version: request.pre.apiVersion,
                         data: 'versioned'
                     };
 
@@ -319,6 +319,17 @@ describe('Versioning', () => {
                 headers: {
                     'Accept': 'application/vnd.mysuperapi.v2+json'
                 }
+            });
+            expect(response.statusCode).to.equal(200);
+            expect(response.result.version).to.equal(2);
+            expect(response.result.data).to.equal('versioned');
+        });
+
+        it('sets pre.apiVersion properly', async () => {
+
+            const response = await server.inject({
+                method: 'GET',
+                url: '/v2/versioned'
             });
             expect(response.statusCode).to.equal(200);
             expect(response.result.version).to.equal(2);
