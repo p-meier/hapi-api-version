@@ -2,9 +2,11 @@ language: node_js
 
 node_js:
     - 8
+    - 10
 
 env:
     - HAPI_VERSION="17"
+    - HAPI_VERSION="18"
 
 install:
     - npm install --no-package-lock

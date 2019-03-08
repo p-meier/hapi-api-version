@@ -133,7 +133,7 @@ exports.register = (server, options) => {
         const route = server.match(method, versionedPath);
 
         if (route && route.path.indexOf(options.basePath + 'v' + requestedVersion + '/') === 0) {
-            request.setUrl(options.basePath + 'v' + requestedVersion + request.url.path.slice(options.basePath.length - 1)); //required to preserve query parameters
+            request.setUrl(options.basePath + 'v' + requestedVersion + request.path.slice(options.basePath.length - 1) + (request.url.search || '')); //required to preserve query parameters
         }
 
         //Set version for usage in handler
