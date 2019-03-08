@@ -16,7 +16,7 @@ let server;
 beforeEach(async () => {
 
     try {
-        server = Hapi.server();
+        server = new Hapi.Server();
         await server.start();
     }
     catch (err) {
@@ -835,7 +835,7 @@ describe(' -> path parameters', () => {
     it('resolves optional path parameters - without optional value', async () => {
 
         const apiVersion = 2;
-        const pathParam = (server.version.indexOf('17.') > -1 ? '' : undefined);
+        const pathParam = (parseInt(server.version.match(/^(\d+)/)[1]) >= 17 ? '' : undefined);
 
         const response = await server.inject({
             method: 'GET',
