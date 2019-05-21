@@ -1,11 +1,11 @@
 {
   "name": "hapi-api-version",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "An API versioning plugin for hapi.",
   "main": "index.js",
   "scripts": {
-    "test": "lab -a code -t 100 -L -v",
-    "test-coverage": "lab -c -a code -r html -o coverage/coverage.html"
+    "test": "lab -a @hapi/code -t 100 -L -v",
+    "test-coverage": "lab -c -a @hapi/code -r html -o coverage/coverage.html"
   },
   "repository": {
     "type": "git",
@@ -23,17 +23,17 @@
     "node": ">=8.0.0"
   },
   "peerDependencies": {
-    "hapi": ">=17.x.x"
+    "@hapi/hapi": "^18.3.1"
   },
   "devDependencies": {
-    "hapi": "17.x.x",
-    "code": "5.x.x",
-    "lab": "15.x.x"
+    "@hapi/hapi": "^18.3.1",
+    "@hapi/code": "^5.3.1",
+    "@hapi/lab": "^19.0.1"
   },
   "dependencies": {
-    "boom": "^5.2.0",
-    "hoek": "^4.2.0",
-    "joi": "^10.6.0",
-    "media-type": "^0.3.0"
+    "@hapi/boom": "^7.4.2",
+    "@hapi/hoek": "^6.2.3",
+    "@hapi/joi": "^15.0.3",
+    "media-type": "^0.3.1"
   }
 }

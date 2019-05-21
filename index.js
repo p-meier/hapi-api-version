@@ -1,8 +1,8 @@
 'use strict';
 
-const Boom = require('boom');
-const Hoek = require('hoek');
-const Joi = require('joi');
+const Boom = require('@hapi/boom');
+const Hoek = require('@hapi/hoek');
+const Joi = require('@hapi/joi');
 const MediaType = require('media-type');
 
 const Package = require('./package');
@@ -73,10 +73,12 @@ const _addVersionToResponseHeader = function (request, requestedVersion, options
     else {
         response.header(headerName, requestedVersion);
     }
+
     return;
 };
 
 exports.name = Package.name;
+
 exports.version = Package.version;
 
 exports.register = (server, options) => {
