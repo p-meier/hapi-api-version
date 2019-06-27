@@ -76,6 +76,16 @@ const _addVersionToResponseHeader = function (request, requestedVersion, options
     return;
 };
 
+const _attemptPathDecoding = function (request) {
+
+    try {
+        decodeURI(request.path);
+    }
+    catch (err) {
+        throw Boom.badRequest('Invalid path');
+    }
+};
+
 exports.name = Package.name;
 exports.version = Package.version;
 
@@ -90,6 +100,8 @@ exports.register = (server, options) => {
     options = validateOptions.value;
 
     server.ext('onRequest', (request, h) => {
+        // Surface any URI decoding errors before calling server.match
+        _attemptPathDecoding(request);
 
         //First check for custom header
         let requestedVersion = _extractVersionFromCustomHeader(request, options);
