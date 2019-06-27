@@ -3,6 +3,7 @@
 const Hapi = require('hapi');
 const Code = require('code');
 const Lab = require('lab');
+const Boom = require('boom');
 
 const lab = exports.lab = Lab.script();
 
@@ -906,4 +907,46 @@ describe('Versioning with passive mode', () => {
         expect(response.result.data).to.equal('unversioned');
     });
 });
+
+describe('Malformed URLs with a catchall route', () => {
+
+    beforeEach(async () => {
+
+        await server.register({
+            plugin: require('../'),
+            options: {
+                validVersions: [0, 1, 2],
+                defaultVersion: 1,
+                vendorName: 'mysuperapi'
+            }
+        });
+        server.route({
+            method: 'GET',
+            path: '/{path*}',
+            handler: function (request, h) {
+
+                throw Boom.notFound('Not found');
+            }
+        });
+    });
+
+    it('returns 400 for an invalid path', async () => {
+
+        const response = await server.inject({
+            method: 'GET',
+            url: '/%C0%AE%C0%AE'
+        });
+        expect(response.statusCode).to.equal(400);
+    });
+
+    it('returns 404 for a missing patch', async () => {
+
+        const response = await server.inject({
+            method: 'GET',
+            url: '/validencoding'
+        });
+        expect(response.statusCode).to.equal(404);
+    });
+});
+
 
