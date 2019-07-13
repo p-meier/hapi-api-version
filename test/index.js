@@ -1,9 +1,9 @@
 'use strict';
 
-const Hapi = require('hapi');
-const Code = require('code');
-const Lab = require('lab');
-const Boom = require('boom');
+const Hapi = require('@hapi/hapi');
+const Code = require('@hapi/code');
+const Lab = require('@hapi/lab');
+const Boom = require('@hapi/boom');
 
 const lab = exports.lab = Lab.script();
 
@@ -39,7 +39,7 @@ describe('Plugin registration', () => {
         }
         catch (e) {
             done();
-        };
+        }
     });
 
 
@@ -894,6 +894,20 @@ describe('Versioning with passive mode', () => {
                 return response;
             }
         });
+
+        server.route({
+            method: 'GET',
+            path: '/v1/versioned',
+            handler: function (request, h) {
+
+                const response = {
+                    data: 'versioned',
+                    version: request.pre.apiVersion
+                };
+
+                return response;
+            }
+        });
     });
 
     it('returns no version if no header is supplied', async () => {
@@ -905,6 +919,20 @@ describe('Versioning with passive mode', () => {
         expect(response.statusCode).to.equal(200);
         expect(response.result.version).to.equal(undefined);
         expect(response.result.data).to.equal('unversioned');
+    });
+
+    it('returns version if header is supplied with passive mode on', async () => {
+
+        const response = await server.inject({
+            method: 'GET',
+            url: '/versioned',
+            headers: {
+                'Accept': 'application/vnd.mysuperapi.v1+json'
+            }
+        });
+        expect(response.statusCode).to.equal(200);
+        expect(response.result.version).to.equal(1);
+        expect(response.result.data).to.equal('versioned');
     });
 });
 

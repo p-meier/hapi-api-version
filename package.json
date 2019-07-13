@@ -4,8 +4,8 @@
   "description": "An API versioning plugin for hapi.",
   "main": "index.js",
   "scripts": {
-    "test": "lab -a code -t 100 -L -v",
-    "test-coverage": "lab -c -a code -r html -o coverage/coverage.html"
+    "test": "lab -a @hapi/code -t 100 -L -v --lint-fix",
+    "test-coverage": "lab -c -a @hapi/code -r html -o coverage/coverage.html"
   },
   "repository": {
     "type": "git",
@@ -20,20 +20,20 @@
   "author": "Patrick Meier",
   "license": "Apache-2.0",
   "engines": {
-    "node": ">=8.0.0"
+    "node": ">=8.12.0"
   },
   "peerDependencies": {
     "hapi": ">=17.x.x"
   },
   "devDependencies": {
-    "hapi": "17.x.x",
-    "code": "5.x.x",
-    "lab": "15.x.x"
+    "@hapi/hapi": "18.x.x",
+    "@hapi/code": "5.x.x",
+    "@hapi/lab": "19.x.x"
   },
   "dependencies": {
-    "boom": "^5.2.0",
-    "hoek": "^4.2.0",
-    "joi": "^10.6.0",
-    "media-type": "^0.3.0"
+    "@hapi/boom": "^7.4.2",
+    "@hapi/hoek": "^8.0.2",
+    "@hapi/joi": "^15.1.0",
+    "media-type": "^0.3.1"
   }
 }
