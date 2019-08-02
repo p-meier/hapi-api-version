@@ -23,7 +23,7 @@
     "node": ">=8.12.0"
   },
   "peerDependencies": {
-    "hapi": ">=17.x.x"
+    "@hapi/hapi": ">=17.x.x"
   },
   "devDependencies": {
     "@hapi/hapi": "18.x.x",
