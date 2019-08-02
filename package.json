@@ -1,6 +1,6 @@
 {
   "name": "hapi-api-version",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "description": "An API versioning plugin for hapi.",
   "main": "index.js",
   "scripts": {
