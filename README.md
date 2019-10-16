@@ -37,7 +37,7 @@ const init = async function () {
     try {
         const server = new Hapi.server({ port: 3000 });
         await server.register({
-            register: require('hapi-api-version'),
+            plugin: require('hapi-api-version'),
             options: {
                 validVersions: [1, 2],
                 defaultVersion: 2,
